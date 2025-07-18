@@ -119,6 +119,7 @@ typedef struct
 
 DB_holder* loadFiles();
 DB_holder* save_files(DB_holder* db_holder);
+void free_DB_holder(DB_holder* db_holder);
 int menu_decision();
 void fun_executer(int decision, DB_holder* db_holder);
 

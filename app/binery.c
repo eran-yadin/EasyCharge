@@ -139,6 +139,10 @@ void check_number_of_cars(Station* st_db)
 	check_number_of_cars(st_db->right);
 	//init
 	st_db->nCars = 0;
+	if (!st_db->portList)
+	{
+		return;
+	}
 	Port* current_port = st_db->portList;
 	while (current_port != NULL) {
 		if (current_port->p2car != NULL) {
@@ -186,6 +190,46 @@ void write_st_to_file_rec(Station* st_db, FILE* pf)
 	fprintf(pf, "%u,%s,%d,%2.2lf,%2.2lf\n", st_db->id, st_db->name, st_db->nPorts, st_db->coord[0], st_db->coord[1]);
 	write_st_to_file_rec(st_db->left, pf); // Write left subtree
 	write_st_to_file_rec(st_db->right, pf); // Write right subtree
+}
+
+
+//-----free the station tree-----
+void free_station(Station* st_db) 
+{
+	if (st_db == NULL) {
+		return; // Base case: if the station is NULL, return
+	}
+	free(st_db->name); // Free the name string
+	free_port_list(st_db->portList); // Free the port list
+	free_car_queue(&st_db->carQueue); // Free the car queue
+	free_station(st_db->left); // Free left subtree
+	free_station(st_db->right); // Free right subtree
+	free(st_db); // Free the station itself
+}
+
+void free_st_db(Station* st_db) 
+{
+	if (st_db == NULL) {
+		return; // Base case: if the station is NULL, return
+	}
+	free_st_db(st_db->left); // Free left subtree
+	free_st_db(st_db->right); // Free right subtree
+	free_station(st_db); // Free the station itself
+}
+
+void free_car_queue(qCar* queue) 
+{
+	if (queue == NULL) {
+		return; // Base case: if the queue is NULL, return
+	}
+	carNode* current = queue->front;
+	while (current != NULL) {
+		carNode* temp = current;
+		current = current->next;
+		free(temp); // Free each car in the queue
+	}
+	queue->front = NULL; // Set front to NULL after freeing
+	queue->rear = NULL; // Set rear to NULL after freeing
 }
 
 //--------car_db & tCar: func---------
@@ -326,6 +370,21 @@ tCar* remove_from_tCar(tCar* head, const char* nLicense) {
 	return head;
 }
 
+void free_tCar_db(tCar* head) 
+{
+	if (!head)
+	{
+		//error code:
+		return;
+	}
+	free_tCar_db(head->left);
+	free_tCar_db(head->right);
+	if (head->car) {
+		free(head->car); // Free the Car structure
+	}
+	free(head); // Free the tCar node itself
+}
+
 // Initialize a new tCar node
 tCar* init_tCar() {
 	tCar* head = malloc(sizeof(tCar));
@@ -377,13 +436,14 @@ tCar* get_tCar_from_file(char const *file_name)
 	tree_head = turn_db_car_to_tree(db_head);
 
 	//free the car_db linked list
-	free_car_db(db_head);
+	free_car_linked_list(db_head);
 	fclose(pf);
 	return tree_head;
 }
 
 //free the car_db linked list --> get_tCar_from_file
-void free_car_db(car_db* head) {
+void free_car_linked_list(car_db* head) 
+{
 	car_db* temp;
 	while (head != NULL) {
 		temp = head;

@@ -23,6 +23,7 @@ int main() {
 		DB_holder* DB = loadFiles();
 		if (DB == NULL) {
 			//error code:
+			//see if needing fuc to create the DB_holder
 			fprintf(stderr, "Failed to load database.\n");
 			return EXIT_FAILURE;
 		}

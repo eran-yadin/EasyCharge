@@ -104,6 +104,19 @@ int menu_decision()
 	return decision;
 }
 
+void free_DB_holder(DB_holder* db_holder)
+{
+	if (db_holder == NULL) {
+		return; // Nothing to free
+	}
+	if (db_holder->st_db != NULL) {
+		free_station(db_holder->st_db);
+	}
+	if (db_holder->car_db != NULL) {
+		free_tCar_db(db_holder->car_db);
+	}	
+}
+
 void fun_executer(int decision, DB_holder* db_holder)
 {
 	if (db_holder == NULL) {
@@ -154,6 +167,8 @@ void fun_executer(int decision, DB_holder* db_holder)
 		break;
 	default:
 		printf("Exiting the program.\n");
+		save_files(db_holder); // Save the database before exiting
+		free_DB_holder(db_holder); // Free the database holder
 		exit(0);
 	}
 }
@@ -240,3 +255,5 @@ void print_nearest_Station(Station* st,coord user_coord)
 		printf("No cars in the station.\n");
 	}
 }
+
+//func 2: add new station
