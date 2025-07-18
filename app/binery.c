@@ -256,7 +256,7 @@ car_db* get_db_car_from_file(FILE* pf)
 	char mod[5];
 	sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod, &head->totalPayed, &head->st_id,&head->port,&head->inqueue);
 	strcpy(head->nLicense, n_ls);
-	head->type = which_mod_port(mod);
+	head->type = which_port_type_st(mod);
 	head->next = NULL; // Initialize the next pointer to NULL
 	if (feof(pf)) {
 		free(head);
@@ -273,7 +273,7 @@ car_db* get_db_car_from_file(FILE* pf)
 		}
 		sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod, &new_car->totalPayed, &new_car->st_id, &new_car->port, &new_car->inqueue);
 		strcpy(new_car->nLicense, n_ls);
-		new_car->type = which_mod_port(mod);
+		new_car->type = which_port_type_st(mod);
 		new_car->next = NULL; // Initialize the next pointer to NULL
 		insert_car_db(head, new_car);
 	} while (!feof(pf));
@@ -453,7 +453,8 @@ void free_car_linked_list(car_db* head)
 }
 
 //searchCar func
-Car* find_car(tCar* car_db, char* nlis) {
+Car* find_car(tCar* car_db, char* nlis) 
+{
 	if (car_db == NULL) {
 		return NULL; // Tree is empty
 	}

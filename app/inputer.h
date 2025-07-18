@@ -13,7 +13,7 @@ Date getCurrentDate();
 void printDate(Date d);
 //get Date from user
 
-Date inputDateFromUser();
+Date get_user_Data();
 //make sute the value is in the range
 
 int is_valid(int val, int max, int min);
@@ -21,11 +21,15 @@ int is_valid(int val, int max, int min);
 //get user coordinates in struct coord(fl x,fl y)
 coord get_user_coord();
 //get user input for car id
-char* get_car_id_from_user();
+char* get_user_nLisence();
 
 void trim_newline(char* str);
 
 void wait_for_user();
 
 void clean_stdin();
+
+unsigned get_user_st_ID();
+
+tCar* get_user_new_car();
 #endif

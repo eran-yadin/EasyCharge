@@ -7,6 +7,8 @@
 #include "lib.h"
 #include "inputer.h"
 #include "print_lib.h"
+#include "binary.h"
+#include "port.h"
 
 char *get_user_string()
 {
@@ -46,7 +48,7 @@ void printDate(Date d) {
 }
 
 
-Date inputDateFromUser() {
+Date get_user_Data() {
     Date d;
 	//make sure to error handle the input (scanf)
     do
@@ -112,20 +114,20 @@ coord get_user_coord()
 }
 
 // This function prompts the user to enter a car ID and returns it as a 9-digit string.
-char* get_car_id_from_user()
+char* get_user_nLisence()
 {
     int ID;
     do
     {
-        printf("Enter Car ID[9]: ");
+        printf("Enter Car ID[8]: ");
         scanf("%d", &ID);
-    } while (ID<99999999 && ID>0);
+    } while (!(ID<99999999 && ID>0));
 	char* car_id = malloc(10 * sizeof(char)); // 9 digits + null terminator
 	if (car_id == NULL) {
 		fprintf(stderr, "Memory allocation failed\n");
 		exit(EXIT_FAILURE);
 	}
-	snprintf(car_id, 10, "%09d", ID); // Format as 9-digit string
+	snprintf(car_id, 10, "%08d", ID); // Format as 9-digit string
 	return car_id;
 }
 
@@ -148,4 +150,49 @@ void clean_stdin()
 {
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF); // Clear the input buffer
+}
+
+unsigned get_user_st_ID()
+{
+	unsigned st_id;
+	do
+	{
+		printf("Enter Station ID: ");
+		scanf("%u", &st_id);
+	} while (st_id <= 0); // Ensure the station ID is a positive integer
+	return st_id;
+}
+
+tCar* get_user_new_car()
+{
+	tCar* new_car = init_tCar();
+	if (new_car == NULL) {
+		fprintf(stderr, "Memory allocation failed for new car.\n");
+		return NULL;
+	}
+
+	printf("Enter Car License Plate: ");
+	char* license_plate = get_user_nLisence();
+	if (license_plate == NULL) {
+		free(new_car);
+		return NULL; // Error handling for license plate input
+	}
+	strncpy(new_car->car->nLicense, license_plate, 9);
+	new_car->car->nLicense[9] = '\0'; // Ensure null termination
+	free(license_plate);
+
+	printf("Enter Car Charge Type (0 - FAST, 1 - MID, 2 - SLOW): ");
+	int type;
+	do
+	{
+
+		scanf("%d", &type);
+	} while (!is_valid(type, 2, 0));
+	new_car->car->type = which_port_type_int(type);
+
+	new_car->car->totalPayed = 0.0; // Initialize total paid to 0
+	new_car->car->pPort = NULL; // No port assigned initially
+	new_car->car->inqueue = 0; // Not in queue initially
+
+	return new_car;
 }

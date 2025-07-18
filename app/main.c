@@ -29,7 +29,7 @@ int main() {
 		}
 		decision = menu_decision();
 		fun_executer(decision, DB);
-		print_ALL_DB(DB->st_db);
+		//print_ALL_DB(DB->st_db);
 		save_files(DB);
 	} while (decision != 0);
 }

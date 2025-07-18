@@ -130,7 +130,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		locNearSt(db_holder->st_db);
 		break;
 	case FUNC_2_:
-		// Implement functionality for case 2
+		charge_car(db_holder);
 		break;
 	case FUNC_3_:
 		// Implement functionality for case 3
@@ -257,3 +257,106 @@ void print_nearest_Station(Station* st,coord user_coord)
 }
 
 //func 2: add new station
+void charge_car(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	Station* st = NULL;
+	int st_id = 0;
+
+	//get user station ID 
+	printf("Enter Station ID: ");
+	do
+	{
+		st_id = get_user_st_ID();
+		if (st_id == 0)
+		{
+			printf("Exiting...\n");
+			wait_for_user();
+			return;
+		}
+		st = find_station_by_id(db_holder->st_db, st_id);
+		if (!st)
+		{
+			printf("station does not exist, try again OR enter 0 to exit: ");
+		}
+	} while (!st);
+
+	//get user license plate
+	char* license_plate;
+	tCar* tcar = init_tCar();
+	do
+	{
+		license_plate = get_user_nLisence();
+		if (license_plate == NULL) {
+			//error code:
+			return;
+		}
+		tcar->car = find_car(db_holder->car_db, license_plate);
+		if (!tcar->car) 
+		{
+			printf("Car with license plate %s does not exist\ndo you want:\n[1]. to add a car\nOR\n[2]. try gain\n[0] exit ", license_plate);
+			int choice;
+			do
+			{
+				scanf("%d", &choice);
+				clean_stdin(); // Clear the input buffer
+				if (!is_valid(choice, 2, 0)) {
+					printf("Invalid choice. Please choose 1, 2, or 0.\n");
+				}
+			} while (!is_valid(choice, 2, 0));
+			
+			// Process the user's choice
+			if (choice == 0) {
+				printf("Exiting...\n");
+				wait_for_user();
+				free(license_plate);
+				return;
+			}
+			else if (choice == 1) {
+				//add new car
+				tcar->car = get_user_new_car();
+				//new car
+				db_holder->car_db = rec_add_to_tree(db_holder->car_db, tcar);
+			}
+			else if (choice == 2) {
+				printf("Try again: ");
+			}
+			free(license_plate);
+			license_plate = NULL;
+		}
+	} while (!tcar->car);
+
+	//car exist and station exist
+	Port* port = is_port_type_exist(st, tcar->car->type);
+	if (!port || port->status == 3) {
+		printf("No ports available for this car type.\n");
+		wait_for_user();
+		return;
+	}
+	if (port->status == 2)
+	{
+		port->p2car = tcar->car; // Assign the car to the port
+		port->status = 1; // Mark the port as occupied
+		tcar->car->pPort = port; // Assign the port to the car
+		tcar->car->inqueue = 0; // Mark the car as not in queue
+		st->nCars++; // Increment the number of cars in the station
+		port->tin = getCurrentDate(); // Set the time in for the port
+		printf("Car with license plate %s has been charged at port %d in station %s.\n",
+			tcar->car->nLicense, port->num, st->name);
+	}
+	else
+	{
+		carNode* car_node = malloc(sizeof(carNode));
+		car_node->car = tcar->car; // Assign the car to the new car node
+		st->carQueue.rear->next = car_node; // Link the new car node at the end of the queue
+		st->carQueue.rear = car_node; // Update the rear pointer to the new car node
+		st->nCars++; // Increment the number of cars in the station
+		printf("Car with license plate %s has been added to the queue in station %s.\n",
+			tcar->car->nLicense, st->name);
+	}
+}

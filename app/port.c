@@ -27,7 +27,8 @@ Port* createPort(int num, portType type) {
 }
 
 //get test base the type of port and switch it to the right mode
-portType which_mod_port(const char* mod) {
+portType which_port_type_st(const char* mod)
+{
 	if (strcmp(mod, "FAST") == 0) {
 		return FAST;
 	}
@@ -40,6 +41,22 @@ portType which_mod_port(const char* mod) {
 	else {
 		//error code:
 		fprintf(stderr, "Unknown port type: %s\n", mod);
+		return SLOW; // Default to SLOW if unknown
+	}
+}
+
+portType which_port_type_int(int p_t)
+{
+	switch (p_t) {
+	case 0:
+		return FAST;
+	case 1:
+		return MID;
+	case 2:
+		return SLOW;
+	default:
+		//error code:
+		fprintf(stderr, "Unknown port type: %d\n", p_t);
 		return SLOW; // Default to SLOW if unknown
 	}
 }
@@ -75,7 +92,7 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 			free(port);
 			continue; // Skip this line if it doesn't match the expected format
 		}
-		port->type = which_mod_port(type);
+		port->type = which_port_type_st(type);
 		port->next = NULL;
 		strcpy(port->nLicense, license);
 		raw_db_port* current = head;
@@ -184,7 +201,7 @@ Port* linker_port(int id, raw_db_port* port_data,tCar *car_db)
 		fprintf(stderr, "Port data is NULL.\n");
 		return NULL;
 	}
-	raw_db_port* found_port = find_port_by_id(port_data, id);
+	raw_db_port* found_port = find_port_raw_data_by_id(port_data, id);
 	if (found_port == NULL) {
 		fprintf(stderr, "Port with ID %d not found.\n", id);
 		return NULL;
@@ -232,8 +249,8 @@ Port* linker_port(int id, raw_db_port* port_data,tCar *car_db)
 	return head; // Return the linked list of ports
 }
 
-//find_port_by_id fanction --> linker_port --> add_ports_to_stations --> laodFiles
-raw_db_port* find_port_by_id(raw_db_port* head, int id) {
+//find_port_raw_data_by_id fanction --> linker_port --> add_ports_to_stations --> laodFiles
+raw_db_port* find_port_raw_data_by_id(raw_db_port* head, int id) {
 	raw_db_port* current = head;
 	while (current != NULL) {
 		if (current->station_id == id) {
@@ -390,3 +407,19 @@ void write_port_list_to_file(Port* head, int id, FILE* pf)
 		head = head->next; // Move to the next port in the list
 	}
 }
+
+Port* is_port_type_exist(Station* st_db, portType port) 
+{
+	if (!st_db)
+	{
+		return;
+	}
+	Port* current = st_db->portList;
+	while (current != NULL) {
+		if (current->type == port) { // Check if the port type matches and is free
+			return current; // Return the first matching port
+		}
+		current = current->next; // Move to the next port in the list
+	}
+}
+

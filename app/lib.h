@@ -130,4 +130,6 @@ double distance(coord a, coord b);
 coord convert_coord(double x, double y);
 void print_nearest_Station(Station* st, coord user_coord);
 
+//func 2:
+void charge_car(DB_holder* db_holder);
 #endif
