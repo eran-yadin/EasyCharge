@@ -1,0 +1,34 @@
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "lib.h"
+#include "reader.h"
+#include "print_lib.h"
+#include "inputer.h"
+#include "port.h"
+#include "binery.h"
+#include "error_handle.h"
+
+
+
+int main() {
+	showOpening();
+	printf("welcome:\n");
+	int decision = 0;
+	do
+	{
+		DB_holder* DB = loadFiles();
+		if (DB == NULL) {
+			//error code:
+			fprintf(stderr, "Failed to load database.\n");
+			return EXIT_FAILURE;
+		}
+		decision = menu_decision();
+		fun_executer(decision, DB);
+		print_ALL_DB(DB->st_db);
+		save_files(DB);
+	} while (decision != 0);
+}

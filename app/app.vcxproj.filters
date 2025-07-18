@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{397ac005-5cdc-4ee1-a205-5a7c64d797b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\save_files">
+      <UniqueIdentifier>{ccb794c1-97f6-4fb3-aa40-49208190f903}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="error_handle.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="inputer.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="lib.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="port.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="binery.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c" />
+    <ClCompile Include="print_lib.c">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="error_handle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inputer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="port.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="binery.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="print_lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Stations.txt">
+      <Filter>source\save_files</Filter>
+    </Text>
+    <Text Include="Ports.txt">
+      <Filter>source\save_files</Filter>
+    </Text>
+    <Text Include="LineOfCars.txt">
+      <Filter>source\save_files</Filter>
+    </Text>
+    <Text Include="Cars.txt">
+      <Filter>source\save_files</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
