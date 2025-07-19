@@ -128,6 +128,22 @@ Station* find_station_by_id(Station* head, unsigned id)
 	}
 }
 
+Station* find_station_by_name(Station* head, const char* name)
+{
+	if (head == NULL) {
+		return NULL; // Base case: if the station is NULL, return NULL
+	}
+	if (strcmp(head->name, name) == 0) {
+		return head; // Found the station by name
+	}
+	// Search in left and right subtrees
+	Station* left_result = find_station_by_name(head->left, name);
+	if (left_result != NULL) {
+		return left_result; // Found in left subtree
+	}
+	return find_station_by_name(head->right, name); // Search in right subtree
+}
+
 //check the number of cars in each station
 void check_number_of_cars(Station* st_db)
 {
@@ -515,6 +531,7 @@ void test_find_car() {
 	free(left); free(right); free(root);
 }
 
+//write tCar to file
 void write_tCar_to_file(tCar* head,Station* st_db, char const* file_name) 
 {
 	FILE* pf = fopen(file_name, "w");
@@ -544,6 +561,7 @@ void write_tCar_to_file_rec(tCar* head,Station *st_db, FILE* pf)
 	write_tCar_to_file_rec(head->right,st_db, pf); // Write right subtree
 }
 
+//find the station ID by license number
 int find_st_id_by_licanse(Station* st_db, char const* license) 
 {
 	if (st_db == NULL) {
@@ -563,3 +581,4 @@ int find_st_id_by_licanse(Station* st_db, char const* license)
 	}
 	return find_st_id_by_licanse(st_db->right, license); // Search in right subtree
 }
+

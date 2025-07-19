@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "math.h"
 
 #include "lib.h"
 #include "inputer.h"
@@ -21,6 +22,7 @@ char *get_user_string()
 		exit(EXIT_FAILURE);
 	}
 	strcpy(input, buffer);
+	trim_newline(input);
     return input;
 }
 
@@ -165,7 +167,16 @@ unsigned get_user_st_ID()
 
 tCar* get_user_new_car()
 {
-	tCar* new_car = init_tCar();
+	tCar* new_car = malloc(sizeof(tCar));
+	if (!new_car)
+	{
+		return;
+	}
+	new_car->car = malloc(sizeof(Car));
+	new_car->car->pPort = NULL;
+	new_car->left = NULL;
+	new_car->right = NULL;
+
 	if (new_car == NULL) {
 		fprintf(stderr, "Memory allocation failed for new car.\n");
 		return NULL;
@@ -195,4 +206,24 @@ tCar* get_user_new_car()
 	new_car->car->inqueue = 0; // Not in queue initially
 
 	return new_car;
+}
+
+unsigned* turn_string_to_us_int(const char* str) 
+{
+	int* p;
+	int i = strlen(str)-1;
+	int u = 0;
+	int sum = 0;
+	for (i; i > -1; i)
+	{
+		if (*str < '0' || *str > '9')
+		{
+			return NULL; // Return NULL if invalid character found
+		}
+		int temp = (str[i] - '0');
+		sum = sum+ pow(10,u)*(str[i] - '0');
+		u++; i--;
+	}
+	p = &sum;
+	return p;
 }

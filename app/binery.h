@@ -12,6 +12,8 @@ Station* create_station(unsigned id, const char* name, int nPorts, double coordX
 
 Station* find_station_by_id(Station* head, unsigned id);
 
+Station* find_station_by_name(Station* head, const char* name);
+
 void write_st_to_file(Station* st_db, char* file_name);
 
 void write_st_to_file_rec(Station* st_db, FILE* pf);

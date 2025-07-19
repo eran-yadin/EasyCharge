@@ -32,4 +32,6 @@ void clean_stdin();
 unsigned get_user_st_ID();
 
 tCar* get_user_new_car();
+
+unsigned* turn_string_to_us_int(const char* str);
 #endif

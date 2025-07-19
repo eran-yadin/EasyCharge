@@ -11,7 +11,7 @@
 #include "inputer.h"
 #include "print_lib.h"
 
-//
+//----files names----
 #define stations_file "Stations.txt"
 #define ports_file "Ports.txt"
 #define queues_file "LineOfCars.txt"
@@ -19,7 +19,7 @@
 
 // Define function codes for menu options
 #define FUNC_1_locate_nearest_station 1
-#define FUNC_2_ 2
+#define FUNC_2_charge_car 2
 #define FUNC_3_ 3
 #define FUNC_4_ 4
 #define FUNC_5_ 5
@@ -129,7 +129,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 	case FUNC_1_locate_nearest_station:
 		locNearSt(db_holder->st_db);
 		break;
-	case FUNC_2_:
+	case FUNC_2_charge_car:
 		charge_car(db_holder);
 		break;
 	case FUNC_3_:
@@ -266,26 +266,31 @@ void charge_car(DB_holder* db_holder)
 		return;
 	}
 	Station* st = NULL;
-	int st_id = 0;
 
 	//get user station ID 
 	printf("Enter Station ID: ");
 	do
 	{
-		st_id = get_user_st_ID();
-		if (st_id == 0)
-		{
+		char* st_id_str = get_user_string();
+		unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
+		if (st_id_unsigned && st_id_unsigned == 0)
+		{			// User chose to exit
 			printf("Exiting...\n");
 			wait_for_user();
 			return;
 		}
-		st = find_station_by_id(db_holder->st_db, st_id);
-		if (!st)
+		if (st_id_unsigned) {
+			st = find_station_by_id(db_holder->st_db, *st_id_unsigned);
+		}
+		else
 		{
+			st = find_station_by_name(db_holder->st_db, st_id_str);
+		}
+		if (!st)
+		{	//st does not exist
 			printf("station does not exist, try again OR enter 0 to exit: ");
 		}
 	} while (!st);
-
 	//get user license plate
 	char* license_plate;
 	tCar* tcar = init_tCar();
@@ -293,7 +298,7 @@ void charge_car(DB_holder* db_holder)
 	{
 		license_plate = get_user_nLisence();
 		if (license_plate == NULL) {
-			//error code:
+			//error code: 
 			return;
 		}
 		tcar->car = find_car(db_holder->car_db, license_plate);
@@ -311,6 +316,7 @@ void charge_car(DB_holder* db_holder)
 			} while (!is_valid(choice, 2, 0));
 			
 			// Process the user's choice
+			// i could have done this with a switch case i know!
 			if (choice == 0) {
 				printf("Exiting...\n");
 				wait_for_user();
@@ -318,10 +324,11 @@ void charge_car(DB_holder* db_holder)
 				return;
 			}
 			else if (choice == 1) {
-				//add new car
+				//get new car details
 				tcar->car = get_user_new_car();
-				//new car
+				//add the new car to the database
 				db_holder->car_db = rec_add_to_tree(db_holder->car_db, tcar);
+				tcar->car->pPort = NULL;
 			}
 			else if (choice == 2) {
 				printf("Try again: ");
@@ -333,12 +340,16 @@ void charge_car(DB_holder* db_holder)
 
 	//car exist and station exist
 	Port* port = is_port_type_exist(st, tcar->car->type);
-	if (!port || port->status == 3) {
+	if (tcar->car->pPort) { printf("car allready in a port\n"); wait_for_user();printf("\n\n\n"); return; }//car all ready charging
+	if (tcar->car->inqueue == 1) { printf("car allready inqueue for a port\n"); wait_for_user();printf("\n\n\n"); return; } //car waiting for charging
+	if (!port || port->status == 3) //no ports available or port is under maintenance
+	{
 		printf("No ports available for this car type.\n");
 		wait_for_user();
+		printf("\n\n\n");
 		return;
 	}
-	if (port->status == 2)
+	if (port->status == 2) //free
 	{
 		port->p2car = tcar->car; // Assign the car to the port
 		port->status = 1; // Mark the port as occupied
@@ -349,7 +360,7 @@ void charge_car(DB_holder* db_holder)
 		printf("Car with license plate %s has been charged at port %d in station %s.\n",
 			tcar->car->nLicense, port->num, st->name);
 	}
-	else
+	else //occupied
 	{
 		carNode* car_node = malloc(sizeof(carNode));
 		car_node->car = tcar->car; // Assign the car to the new car node
@@ -359,4 +370,39 @@ void charge_car(DB_holder* db_holder)
 		printf("Car with license plate %s has been added to the queue in station %s.\n",
 			tcar->car->nLicense, st->name);
 	}
+	printf("---------------------\n");
+	wait_for_user();
+	printf("\n\n\n");
 }
+
+//func 3: check car status
+
+
+//func 4: stop charge
+
+
+//func 5: display all stations
+
+
+//func 6: display all cars in station
+
+
+//func 7: report of station's statistics
+
+
+//func 8: Display top customer
+
+
+//func 9: Add new port
+
+
+//func 10: Release charging port
+
+
+//func 11: Remove out of order port
+
+
+//func 12: Remove Customer
+
+
+//func 13: Close station
