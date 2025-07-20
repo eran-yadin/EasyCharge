@@ -1,5 +1,6 @@
 #ifndef _INPUTER_H
 #define _INPUTER_H
+
 #include "lib.h"
 #include "inputer.h"
 //get user input string
@@ -10,7 +11,6 @@ char *get_user_string();
 Date getCurrentDate();
 //print Date for testing
 
-void printDate(Date d);
 //get Date from user
 
 Date get_user_Data();

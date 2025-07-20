@@ -3,6 +3,7 @@
 
 #include "lib.h"
 #include "print_lib.h"
+#include "inputer.h"
 
 void print_menu()
 {
@@ -173,4 +174,70 @@ void showOpening() {
 	printf("\\____/ \\__,_||___/ \\__, | \\____/|_| |_| \\__,_||_|   \\__, | \\___|\n");
 	printf("                    __/ |                            __/ |      \n");
 	printf("                   |___/                            |___/       \n");
+}
+
+void printDate(Date d) 
+{
+	printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
+}
+
+void print_port(Port* port_p, int port_choise[6],int car_choise[5])
+{
+	if (!port_choise)
+	{
+		return;
+	}
+	if (port_choise[0])
+	{
+		printf("port number: %d\n", port_p->num);
+	}
+	if (port_choise[1])
+	{
+		printf("port number: %s\n", port_type_to_string(port_p));
+	}
+	if (port_choise[2])
+	{
+		printf("port_status: %d\n", port_p->status);
+	}
+	if (port_choise[3])
+	{
+		printf("charge time: ");
+		
+	}
+	if (port_choise[4])
+	{
+		print_car(port_p->p2car, car_choise, 0);
+	}
+}
+//print_choise[nLicense,type,totalPayed,inqueu
+void print_car(Car* car_p, int car_choise[5],int port_choise[5])
+{
+
+	if (car_choise[0])
+	{
+		printf("car license: %d\n", car_p->nLicense);
+	}
+	if (car_choise[1])
+	{
+		printf("charge type: %s\n", port_type_to_string(car_p->type));
+	}
+	if (car_choise[2])
+	{
+		printf("tatal paid: %lf\n",car_p->totalPayed);
+	}
+	if (car_choise[3])
+	{
+		if (car_p->inqueue)
+		{
+			printf("car is inqueue\n");
+		}
+		else
+		{
+			printf("car is NOT inqueue\n");
+		}
+	}
+	if (car_choise[4])
+	{
+		print_port(car_p->pPort, port_choise);
+	}
 }

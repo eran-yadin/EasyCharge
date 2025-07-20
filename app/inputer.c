@@ -45,11 +45,6 @@ Date getCurrentDate() {
 }
 
 
-void printDate(Date d) {
-    printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
-}
-
-
 Date get_user_Data() {
     Date d;
 	//make sure to error handle the input (scanf)

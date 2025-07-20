@@ -380,7 +380,17 @@ void charge_car(DB_holder* db_holder)
 
 
 //func 4: stop charge
+void stop_charging(DB_holder* DB)
+{
+	//check DB
 
+	//get user data
+
+	//find car
+
+	//car exist
+	//
+}
 
 //func 5: display all stations
 
