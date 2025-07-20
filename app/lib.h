@@ -132,4 +132,7 @@ void print_nearest_Station(Station* st, coord user_coord);
 
 //func 2:
 void charge_car(DB_holder* db_holder);
+
+//func 3:
+DB_holder checkCarStatus(DB_holder db);
 #endif

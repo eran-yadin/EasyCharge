@@ -384,15 +384,21 @@ DB_holder checkCarStatus(DB_holder db)
 	user_car = find_car(db.car_db, user_car->nLicense);
 
 	if (user_car == NULL)//dont find car
+	{
 		printf("car is not found :(\n");//optional- ask user what to do next
+		return;
+	}
 	
 	if (user_car->pPort)//car in port
 	{
-		//add print func
+		//get station
+		int port[5] = { 1, 0, 0, 1, 0 };
+		print_port(user_car->pPort, port,NULL);
 	}
 
 	if (user_car->inqueue)
 	{
+		//get station
 		//add print func
 	}
 

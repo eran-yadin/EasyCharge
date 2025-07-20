@@ -182,6 +182,7 @@ void printDate(Date d)
 	printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
 }
 
+//print_choise[num,port_type,status,charge_time,car]
 void print_port(Port* port_p, int port_choise[6],int car_choise[5])
 {
 	if (!port_choise)
@@ -202,18 +203,21 @@ void print_port(Port* port_p, int port_choise[6],int car_choise[5])
 	}
 	if (port_choise[3])
 	{
-		printf("charge time: ");
+		printf("charge time: ",get_charge_min(port_p->tin,getCurrentDate()));
 		
 	}
 	if (port_choise[4])
 	{
-		print_car(port_p->p2car, car_choise, 0);
+		print_car(port_p->p2car, car_choise, NULL);
 	}
 }
-//print_choise[nLicense,type,totalPayed,inqueu
+//print_choise[nLicense,type,totalPayed,inqueu,port]
 void print_car(Car* car_p, int car_choise[5],int port_choise[5])
 {
-
+	if (!car_choise)
+	{
+		return;
+	}
 	if (car_choise[0])
 	{
 		printf("car license: %d\n", car_p->nLicense);
@@ -239,6 +243,6 @@ void print_car(Car* car_p, int car_choise[5],int port_choise[5])
 	}
 	if (car_choise[4])
 	{
-		print_port(car_p->pPort, port_choise);
+		print_port(car_p->pPort, port_choise,NULL);
 	}
 }
