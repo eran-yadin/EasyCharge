@@ -116,6 +116,7 @@ void print_port_in_st(Station* st)
 	}
 }
 
+
 void print_port_in_st_only_working(Station* st)
 {
 	Port* current = st->portList;

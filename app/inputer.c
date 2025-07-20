@@ -227,3 +227,38 @@ unsigned* turn_string_to_us_int(const char* str)
 	p = &sum;
 	return p;
 }
+
+unsigned int get_charge_min(Date a, Date b)
+{
+
+	struct tm tm_a = { 0 }, tm_b = { 0 }; //date and hour, include in time.h
+	//tm_year- years since 1900
+	//tm_mon: 0-11. jan=0, feb=1.... dec=11)
+
+	//date a
+	tm_a.tm_year = a.Year - 1900;
+	tm_a.tm_mon = a.Month - 1;
+	tm_a.tm_mday = a.Day;
+	tm_a.tm_hour = a.Hour;
+	tm_a.tm_min = a.Min;
+
+	//date b
+	tm_b.tm_year = b.Year - 1900;
+	tm_b.tm_mon = b.Month - 1;
+	tm_b.tm_mday = b.Day;
+	tm_b.tm_hour = b.Hour;
+	tm_b.tm_min = b.Min;
+
+	//Convert to time_t
+	time_t time_a = mktime(&tm_a);
+	time_t time_b = mktime(&tm_b);
+
+	if (time_a == (time_t)-1 || time_b == (time_t)-1) //convert error
+		return 0;
+
+	double diff_seconds = difftime(time_b, time_a);// get the difference in seconds 
+	unsigned int diff_minutes = (unsigned int)(diff_seconds / 60.0);// convert to minutes
+
+	
+	return diff_minutes > 0 ? diff_minutes : -diff_minutes; //return unsigned
+}

@@ -376,7 +376,32 @@ void charge_car(DB_holder* db_holder)
 	printf("\n\n\n");
 }
 
+
 //func 3: check car status
+DB_holder checkCarStatus(DB_holder db)
+{
+	Car* user_car = get_user_nLisence();
+	user_car = find_car(db.car_db, user_car->nLicense);
+
+	if (user_car == NULL)//dont find car
+		printf("car is not found :(\n");//optional- ask user what to do next
+	
+	if (user_car->pPort)//car in port
+	{
+		//add print func
+	}
+
+	if (user_car->inqueue)
+	{
+		//add print func
+	}
+
+
+}
+
+
+
+
 
 
 //func 4: stop charge
