@@ -167,6 +167,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		break;
 	default:
 		printf("Exiting the program.\n");
+		//add new line test
 		save_files(db_holder); // Save the database before exiting
 		free_DB_holder(db_holder); // Free the database holder
 		exit(0);
