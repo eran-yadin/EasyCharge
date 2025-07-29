@@ -195,7 +195,7 @@ void print_port(Port* port_p, int port_choise[6],int car_choise[5])
 	}
 	if (port_choise[1])
 	{
-		printf("port number: %s\n", port_type_to_string(port_p));
+		printf("port number: %s\n", port_type_to_string(port_p->type));
 	}
 	if (port_choise[2])
 	{

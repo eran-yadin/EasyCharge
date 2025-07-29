@@ -423,3 +423,27 @@ Port* is_port_type_exist(Station* st_db, portType port)
 	}
 }
 
+carNode* remove_car_from_queue(Station* st_db, const char* license) 
+{
+	if (st_db == NULL || st_db->carQueue.front == NULL) {
+		return NULL; // Return NULL if the station or queue is empty
+	}
+	carNode* current = st_db->carQueue.front;
+	carNode* previous = NULL;
+	while (current != NULL) {
+		if (strcmp(current->car->nLicense, license) == 0) { // Check if the car license matches
+			if (previous == NULL) {
+				st_db->carQueue.front = current->next; // Remove from front
+			} else {
+				previous->next = current->next; // Remove from middle or end
+			}
+			if (current == st_db->carQueue.rear) {
+				st_db->carQueue.rear = previous; // Update rear if necessary
+			}
+			return current; // Return the removed car node
+		}
+		previous = current;
+		current = current->next; // Move to the next car in the queue
+	}
+	return NULL; // Return NULL if the car was not found in the queue
+}

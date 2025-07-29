@@ -255,5 +255,5 @@ unsigned int get_charge_min(Date a, Date b)
 	unsigned int diff_minutes = (unsigned int)(diff_seconds / 60.0);// convert to minutes
 
 	
-	return diff_minutes > 0 ? diff_minutes : -diff_minutes; //return unsigned
+	return diff_minutes > 0 ? diff_minutes : abs(diff_minutes); //return unsigned
 }

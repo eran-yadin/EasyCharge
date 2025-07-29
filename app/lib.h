@@ -135,4 +135,34 @@ void charge_car(DB_holder* db_holder);
 
 //func 3:
 DB_holder checkCarStatus(DB_holder db);
+
+//func 4: stop charge
+void stop_charging(DB_holder* DB);
+
+//func 5: display all stations
+
+
+//func 6: display all cars in station
+
+
+//func 7: report of station's statistics
+
+
+//func 8: Display top customer
+
+
+//func 9: Add new port
+
+
+//func 10: Release charging port
+
+
+//func 11: Remove out of order port
+
+
+//func 12: Remove Customer
+
+
+//func 13: Close station
+
 #endif

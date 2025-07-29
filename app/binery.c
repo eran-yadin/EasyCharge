@@ -144,6 +144,28 @@ Station* find_station_by_name(Station* head, const char* name)
 	return find_station_by_name(head->right, name); // Search in right subtree
 }
 
+Station* find_station_by_car(Station* head, const char* n_lic)
+{
+	if (head == NULL) {
+		return NULL; // Base case: if the station is NULL, return NULL
+	}
+	Port* current_port = head->portList;
+	while (current_port != NULL) {
+		if (current_port->p2car != NULL && strcmp(current_port->p2car->nLicense, n_lic) == 0) {
+			return head; // Found the car in this station
+		}
+		current_port = current_port->next;
+	}
+	// Search in left and right subtrees
+	Station* left_result = find_station_by_car(head->left, n_lic);
+	if (left_result != NULL) {
+		return left_result; // Found in left subtree
+	}
+	return find_station_by_car(head->right, n_lic); // Search in right subtree
+}
+
+
+
 //check the number of cars in each station
 void check_number_of_cars(Station* st_db)
 {

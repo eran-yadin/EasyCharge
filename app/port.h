@@ -23,5 +23,6 @@ void write_port_to_file(Station* st_db, const char* file_name);
 void write_port_to_file_rec(Station* st_db, FILE* pf);
 void write_port_list_to_file(Port* head, int id, FILE* pf);
 Port* is_port_type_exist(Station* st_db, portType port);
+carNode* remove_car_from_queue(Station* st_db, const char* license);
 
 #endif // !_Port_H_
