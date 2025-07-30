@@ -11,6 +11,7 @@
 #include "binery.h"
 #include "port.h"
 
+
 char *get_user_string()
 {
     char buffer[255];
@@ -163,7 +164,7 @@ void trim_newline(char* str) {
 void wait_for_user()
 {
 	printf("Press Enter to continue...");
-	while (getchar() != '\n'); // Clear the input buffer
+	fflush(stdin); // Ensure the prompt is printed before waiting
 	getchar(); // Wait for the user to press Enter
 }
 

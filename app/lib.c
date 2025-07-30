@@ -35,10 +35,13 @@
 
 #define CHARGE_COST 1.2
 
-//print settings
+//---------print settings-----------
 //print_ALL_DB
 #define st_choise_des {1, 1, 1, 1, 1, 1, 1, 0} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
-#define st_port_des {1, 1, 1, 1, 1}
+#define st_port_des {1, 1, 1, 1, 1} //print_choise[num,port_type,status,charge_time,car]
+//print_all_cars_in_stastion
+#define car_choise_des_1 {1, 1, 1, 1, 1} // nLicense,type,totalPayed,inqueu,port
+//
 
 
 //load all files to the app
@@ -154,10 +157,10 @@ void fun_executer(int decision, DB_holder* db_holder)
 		break;
 	}
 	case FUNC_6_:
-		// Implement functionality for case 6
+		display_all_cars_in_station(db_holder);
 		break;
 	case FUNC_7_:
-		// Implement functionality for case 7
+		report_station_statistics(db_holder);
 		break;
 	case FUNC_8_:
 		display_top_customer(db_holder);
@@ -172,15 +175,15 @@ void fun_executer(int decision, DB_holder* db_holder)
 		
 		break;
 	case FUNC_12_:
-		
+		remove_customer(db_holder);
 		break;
 	case FUNC_13_:
-		
+		close_station(db_holder);
 		break;
 	default:
 		printf("Exiting the program.\n");
 		//add new line test
-		save_files(db_holder); // Save the database before exiting
+		//save_files(db_holder); // Save the database before exiting
 		free_DB_holder(db_holder); // Free the database holder
 		exit(0);
 	}
@@ -535,10 +538,100 @@ void stop_charging(DB_holder* DB)
 // print_ALL_DB
 
 //func 6: display all cars in station
-
+void display_all_cars_in_station(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	//get user station ID 
+	printf("Enter Station ID or Name: ");
+	Station* st = get_user_station(db_holder->st_db);
+	if (!st)
+	{
+		//st wasnt found
+		return;
+	}
+	int st_choise[] = st_choise_des;
+	int car_choise[] = car_choise_des_1;
+	print_station(st, st_choise, NULL, car_choise);
+	wait_for_user();
+	printf("\n\n\n");
+}
 
 //func 7: report of station's statistics
+void report_station_statistics(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	//get user station ID 
+	printf("Enter Station ID: ");
+	Station* st = get_user_station(db_holder->st_db);
+	if (!st)
+	{
+		//st wasnt found
+		return;
+	}
+	print_station_statistics(st);
+	wait_for_user();
+	printf("\n\n\n");
+}
 
+void print_station_statistics(Station* st)
+{
+	if (st == NULL) {
+		printf("No station found.\n");
+		return;
+	}
+	//setup  numbers for printing
+	int port_sta;
+	float port_load;
+	int count = 0;
+	int car_count = 0;
+	//get port occupation percentage
+	Port* port = st->portList; // Get the head of the port list
+	while (port != NULL)
+	{
+		if (port->status == 1) { // If the port is occupied
+			count++;
+		}
+		port = port->next; // Move to the next port in the list
+	}
+	port_sta = (count*100)/st->nPorts; // Calculate the percentage of occupied ports
+	//get car queue load
+	carNode* car_node = st->carQueue.front; // Get the head of the car queue
+	while (car_node != NULL)
+	{
+		car_count++; // Count the number of cars in the queue
+		car_node = car_node->next; // Move to the next car in the queue
+	}
+	port_load = (float)car_count / st->nPorts; // Calculate the port load as a percentage
+	//print statistics
+	printf("Station ID: %d\n", st->id);
+	printf("Station Name: %s\n", st->name);
+	printf("precent of occupied ports: %d%%\n", port_sta);
+	printf("port load: %f\n", car_count);
+
+	//calculate the percentage of non-working ports
+	count = 0; // Reset count for occupied ports
+	port = st->portList; // Reset port to the head of the port list
+	while (port != NULL)
+	{
+		if (port->status == 3) { // If the port is occupied
+			count++;
+		}
+		port = port->next; // Move to the next port in the list
+	}
+	port_sta = (count * 100) / st->nPorts; // Calculate the percentage of occupied ports
+	//print non-working ports statistics
+	printf("precent of out of order ports: %d%%\n", port_sta);
+}
 
 //func 8: Display top customer
 Car* display_top_customer(DB_holder* db_holder)
@@ -680,6 +773,65 @@ void release_car_from_port(Port* u_port,Station* st)
 
 
 //func 12: Remove Customer
+void remove_customer(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	Car* car_to_remove;
+	char* license_plate_f;
+	//get user license plate
+	do
+	{
+		printf("Enter the license plate of the car to remove (or 0 to exit): ");
+		char* license_plate = get_user_nLisence();
+		if (license_plate == NULL) {
+			//error code: 
+			return;
+		}
+		if( license_plate[7] == '0') // User chose to exit
+		{
+			printf("Exiting...\n");
+			wait_for_user();
+			free(license_plate);
+			return;
+		}
+		car_to_remove = find_car(db_holder->car_db, license_plate);
+		if (!car_to_remove) {
+			printf("Car with license plate %s does not exist.\n", license_plate);
+			free(license_plate);
+		}
+		license_plate_f = license_plate; // Store the license plate for later use
+	} while (!car_to_remove);
+	{
+		printf("Car with license plate %s found.\n", car_to_remove->nLicense);
+		remove_from_tCar(db_holder->car_db, license_plate_f); // Remove the car from the tCar database
+	}
+	
+}
 
 
 //func 13: Close station
+void close_station(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	//get user station ID 
+	printf("Enter Station ID: ");
+	Station* st = get_user_station(db_holder->st_db);
+	if (!st)
+	{
+		//st wasnt found
+		return;
+	}
+	int st_choise[] = st_choise_des; // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
+	print_station(st, st_choise, NULL, NULL); // Print station details
+	db_holder->st_db = free_st_rec(db_holder->st_db,st); // Close the station recursively
+}

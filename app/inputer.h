@@ -38,4 +38,6 @@ tCar* get_user_new_car();
 unsigned* turn_string_to_us_int(const char* str);
 
 unsigned int get_charge_min(Date a, Date b);
+
+void delete_last_two_lines(const char* filename);
 #endif

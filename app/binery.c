@@ -9,6 +9,7 @@
 #include "binery.h"
 #include "port.h"
 #include "print_lib.h"
+#include "inputer.h"
 
 //---------station tree func----------
 // 
@@ -247,8 +248,6 @@ void free_station(Station* st_db)
 	free(st_db->name); // Free the name string
 	free_port_list(st_db->portList); // Free the port list
 	free_car_queue(&st_db->carQueue); // Free the car queue
-	free_station(st_db->left); // Free left subtree
-	free_station(st_db->right); // Free right subtree
 	free(st_db); // Free the station itself
 }
 
@@ -275,6 +274,48 @@ void free_car_queue(qCar* queue)
 	}
 	queue->front = NULL; // Set front to NULL after freeing
 	queue->rear = NULL; // Set rear to NULL after freeing
+}
+
+Station* free_st_rec(Station* st_db,Station* st) 
+{
+	if(st_db == NULL) {
+		return NULL; // Base case: if the station is NULL, return
+	}
+	if(st_db->id == st->id) {
+		if (st_db->left == NULL && st_db->right == NULL) {
+			free_station(st_db);
+			return NULL; // Leaf node
+		}
+		else if (st_db->left == NULL || st_db->right == NULL) {
+			Station* temp = (st_db->left) ? st_db->left : st_db->right;
+			free_station(st_db);
+			return temp; // One child
+		}
+		else {
+			// Two children: find the in-order successor
+			Station* successor = st_db->right;
+			while (successor && successor->left != NULL) {
+				successor = successor->left;
+			}
+			// Clean up old dynamically allocated fields
+			free(st_db->name);
+
+			// Shallow copy all successor data
+			*st_db = *successor;
+
+			// Deep copy the name
+			char* new_name = malloc(strlen(successor->name) + 1);
+			strcpy(new_name, successor->name);
+			st_db->name = new_name;
+
+			st_db->right = free_st_rec(st_db->right, successor);
+			return st_db;
+
+		}
+		st_db->left = free_st_rec(st_db->left, st);
+		st_db->right = free_st_rec(st_db->right, st);
+		return st_db; // Exit the function after freeing
+	}
 }
 
 //--------car_db & tCar: func---------
@@ -307,21 +348,22 @@ car_db* get_db_car_from_file(FILE* pf)
 		free(head);
 		return NULL; // Return NULL if only one line of data
 	}
-	do
+	while (fgets(buffer, sizeof(buffer), pf)) 
 	{
-		fgets(buffer, sizeof(buffer), pf);
 		car_db* new_car = malloc(sizeof(car_db));
-		if (new_car == NULL) {
+		if (!new_car) {
 			fprintf(stderr, "Memory allocation failed for new car\n");
 			free(head);
 			return NULL;
 		}
-		sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod, &new_car->totalPayed, &new_car->st_id, &new_car->port, &new_car->inqueue);
+		sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod,
+			&new_car->totalPayed, &new_car->st_id, &new_car->port, &new_car->inqueue);
 		strcpy(new_car->nLicense, n_ls);
 		new_car->type = which_port_type_st(mod);
-		new_car->next = NULL; // Initialize the next pointer to NULL
+		new_car->next = NULL;
 		insert_car_db(head, new_car);
-	} while (!feof(pf));
+	}
+
 	return head;
 }
 
@@ -570,6 +612,7 @@ void write_tCar_to_file(tCar* head,Station* st_db, char const* file_name)
 	}
 	fprintf(pf, "License,PortType,TotalPayed,StationID,PortNumber,InQueue\n"); // Write header
 	write_tCar_to_file_rec(head,st_db ,pf);
+	//delete_last_two_lines(pf); // Remove the last two lines (empty line and header)
 	fclose(pf);
 }
 
