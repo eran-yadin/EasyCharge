@@ -160,13 +160,13 @@ void fun_executer(int decision, DB_holder* db_holder)
 		// Implement functionality for case 7
 		break;
 	case FUNC_8_:
-		// Implement functionality for case 8
+		display_top_customer(db_holder);
 		break;
 	case FUNC_9_:
 		// Implement functionality for case 9
 		break;
 	case FUNC_10_:
-		// Implement functionality for case 10
+		Release_charging_ports(db_holder);
 		break;
 	case FUNC_11_:
 		
@@ -392,8 +392,19 @@ void charge_car(DB_holder* db_holder)
 //func 3: check car status FASE: TESTING
 void checkCarStatus(DB_holder db)
 {
-	Car* user_car = get_user_nLisence();
-	user_car = find_car(db.car_db, user_car->nLicense);
+	Car* user_car;
+	do
+	{
+		printf("Enter your car license plate (or 0 to exit): ");
+		char* user_lis = get_user_nLisence();
+		if(user_lis[0] == '0') // User chose to exit
+		{
+			printf("Exiting...\n");
+			wait_for_user();
+			return;
+		}
+		user_car = find_car(db.car_db, user_lis);
+	} while (!user_car);
 
 	if (user_car == NULL)//dont find car
 	{
@@ -439,16 +450,21 @@ void stop_charging(DB_holder* DB)
 	}
 
 	//get user data
-	char* nLisence = get_user_nLisence();
-	
-	//find car
-	Car* u_car = find_car(DB->car_db, nLisence);
+	Car* u_car;
 	//car exist?
-	if (u_car == NULL)
+	do
 	{
-		printf("\ncar was not found\n");
-		return; //error code: car not found
-	}
+		printf("Enter your car license plate (or 0 to exit): ");
+		char* user_lis = get_user_nLisence();
+		if (user_lis[0] == '0') // User chose to exit
+		{
+			printf("Exiting...\n");
+			wait_for_user();
+			return;
+		}
+		u_car = find_car(DB->car_db, user_lis);
+	} while (!u_car);
+	
 	//car in port?
 	if (u_car->pPort == NULL)
 	{
@@ -523,7 +539,57 @@ void stop_charging(DB_holder* DB)
 
 
 //func 8: Display top customer
+Car* display_top_customer(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		return;
+	}
+	Car* top_customer = find_top_customer(db_holder->car_db);
+	if (top_customer == NULL) {
+		//error code: no customers found
+		return NULL;
+	}
+	print_top_customer(top_customer);
+}
 
+Car* find_top_customer(tCar* car_db)
+{
+	if (car_db == NULL) {
+		//end of line
+		return NULL;
+	}
+	Car* top_customer = car_db->car;
+	float max_payment = top_customer->totalPayed;
+	Car* left_top = find_top_customer(car_db->left);
+	if((left_top != NULL)? left_top->totalPayed > max_payment:0)
+	{
+		top_customer = left_top;
+		max_payment = top_customer->totalPayed;
+	}
+	Car* right_top = find_top_customer(car_db->right);
+	if((right_top != NULL) ? right_top->totalPayed > max_payment:0)
+	{
+		top_customer = right_top;
+		max_payment = top_customer->totalPayed;
+	}
+	return top_customer;
+}
+
+void print_top_customer(Car* top_customer)
+{
+	if (top_customer == NULL) {
+		printf("No customers found.\n");
+		return;
+	}
+	printf("Top Customer:\n");
+	printf("License Plate: %s\n", top_customer->nLicense);
+	printf("Total Amount Paid: %.2f\n", top_customer->totalPayed);
+	printf("Car Type: %d\n", top_customer->type);
+	printf("----------------------------\n");
+	wait_for_user();
+}
 //run on all stations and find the top customer
 
 //func 9: Add new port

@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "lib.h"
-#include "reader.h"
 #include "print_lib.h"
 #include "inputer.h"
 #include "port.h"

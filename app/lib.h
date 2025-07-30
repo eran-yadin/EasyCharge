@@ -149,7 +149,9 @@ void stop_charging(DB_holder* DB);
 
 
 //func 8: Display top customer
-
+Car* display_top_customer(DB_holder* db_holder);
+Car* find_top_customer(tCar* car_db);
+void print_top_customer(Car* top_customer);
 
 //func 9: Add new port
 
