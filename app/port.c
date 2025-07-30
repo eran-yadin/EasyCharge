@@ -80,8 +80,8 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 		return NULL; // No data in file
 	}
 	while (fgets(buffer, sizeof(buffer), file)) {
-		char type[10];
-		char license[10];
+		char type[11];
+		char license[11];
 		raw_db_port*port = malloc(sizeof(raw_db_port));
 		//10 inputs
 		short check;
