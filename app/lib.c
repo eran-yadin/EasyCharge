@@ -35,6 +35,8 @@
 
 #define CHARGE_COST 1.2
 
+#define OUT_OF_ORDER_PORT 3
+
 //print settings
 //print_ALL_DB
 #define st_choise_des {1, 1, 1, 1, 1, 1, 1, 0} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
@@ -538,7 +540,10 @@ void stop_charging(DB_holder* DB)
 
 
 //func 7: report of station's statistics
+void reportStStat(DB_holder* db)
+{
 
+}
 
 //func 8: Display top customer
 Car* display_top_customer(DB_holder* db_holder)
@@ -676,7 +681,90 @@ void release_car_from_port(Port* u_port,Station* st)
 	return; // Successfully stopped charging
 }
 
+
+
 //func 11: Remove out of order port
+int remove_out_of_order_port(Station* st, int num)// auxiliary function to remove out of order ports from a station
+{
+	Port* current = st->portList; // Start from the head of the port list
+	Port* previous = NULL;
+	Port* temp = NULL;
+
+	while (current)
+	{
+		if (num == current->num)
+		{
+			if (current->status == OUT_OF_ORDER_PORT)
+			{
+				temp = current; //save the address of the current node
+
+				if (previous == NULL) //if removing the head of the list
+				{
+					st->portList = current->next; // update the head of the list
+					current = st->portList; // advance current to the new head
+				}
+				else // for removing a middle or tail node
+				{
+					previous->next = current->next; // skip the current node
+					current = current->next; // advance current to the next node after the one being removed
+				}
+				free(temp);
+				st->nPorts--;
+				return 1; // Return 1 to indicate a port was removed
+			}
+			else // if the port is not out of order, just advance current
+			{
+				printf("Port %d is not out of order.\n", current->num);
+				return 0;
+			}
+		}
+	}
+}
+
+int remOutOrderPort(Station* st_db)
+{
+	if (st_db == NULL)
+	{
+		printf("No stations available.\n");
+		return; // No stations to remove ports from
+	}
+	//get user station
+	Station* st_u = get_user_station(st_db);//get user station by ID
+	if (st_u == NULL) {
+		printf("Station not found.\n");
+		return; // Station not found
+	}
+	
+	print_station(st_u, NULL, NULL, NULL); // Print the station details
+	printf("which port do you want to delete?\n");
+	int port_num = get_user_port_num();
+	int result = remove_out_of_order_port(st_u, port_num); // Remove the out of order port
+	if (result == 1) {
+		printf("Port %d has been removed successfully from station %s.\n", port_num, st_u->name);
+	}
+	else
+	{
+		printf("Port %d is not out of order or does not exist in station %s.\n", port_num, st_u->name);
+	}
+
+}
+
+
+int remove_out_of_order_port_recursive(Station* st)//function to remove ALL out of order ports
+	{
+		if (st == NULL)
+			return 0;
+
+		int total_removed = remove_out_of_order_port(st);
+
+		total_removed += remove_out_of_order_port_recursive(st->left);
+		total_removed += remove_out_of_order_port_recursive(st->right);
+
+		return total_removed;
+	}
+
+
+
 
 
 //func 12: Remove Customer

@@ -227,6 +227,21 @@ tCar* get_user_new_car()
 	return new_car;
 }
 
+int get_user_port_num()
+{
+	char buffer[256]; // 9 digits + null terminato
+	int num;
+	do
+	{
+		printf("Enter port num: ");
+		scanf("%s", &buffer);
+		int* lis = turn_string_to_us_int(buffer);
+		if (lis == NULL) { num = -1; }
+		else { num = *lis; } // Convert the string to an integer
+	} while (!(num < 99999999 && num >= 0));
+	return num;
+}
+
 unsigned* turn_string_to_us_int(const char* str) 
 {
 	int* p;

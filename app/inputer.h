@@ -35,6 +35,8 @@ unsigned get_user_st_ID();
 
 tCar* get_user_new_car();
 
+int get_user_port_num();
+
 unsigned* turn_string_to_us_int(const char* str);
 
 unsigned int get_charge_min(Date a, Date b);
