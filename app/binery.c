@@ -156,6 +156,13 @@ Station* find_station_by_car(Station* head, const char* n_lic)
 		}
 		current_port = current_port->next;
 	}
+	carNode* current_car = head->carQueue.front;
+	while (current_car != NULL) {
+		if (strcmp(current_car->car->nLicense, n_lic) == 0) {
+			return head; // Found the car in the queue of this station
+		}
+		current_car = current_car->next;
+	}
 	// Search in left and right subtrees
 	Station* left_result = find_station_by_car(head->left, n_lic);
 	if (left_result != NULL) {

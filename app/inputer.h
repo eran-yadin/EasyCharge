@@ -16,6 +16,8 @@ Date getCurrentDate();
 Date get_user_Data();
 //make sute the value is in the range
 
+Station* get_user_station(Station* st_db);
+
 int is_valid(int val, int max, int min);
 
 //get user coordinates in struct coord(fl x,fl y)

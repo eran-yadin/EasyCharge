@@ -134,7 +134,7 @@ void print_nearest_Station(Station* st, coord user_coord);
 void charge_car(DB_holder* db_holder);
 
 //func 3:
-DB_holder checkCarStatus(DB_holder db);
+void checkCarStatus(DB_holder db);
 
 //func 4: stop charge
 void stop_charging(DB_holder* DB);
@@ -155,7 +155,8 @@ void stop_charging(DB_holder* DB);
 
 
 //func 10: Release charging port
-
+void Release_charging_ports(DB_holder* db_holder);
+void release_car_from_port(Port* u_port, Station* st);
 
 //func 11: Remove out of order port
 

@@ -8,7 +8,7 @@
 #include "lib.h"
 #include "inputer.h"
 #include "print_lib.h"
-#include "binary.h"
+#include "binery.h"
 #include "port.h"
 
 char *get_user_string()
@@ -79,6 +79,27 @@ Date get_user_Data() {
     } while (!is_valid(d.Min,59,0));
     
     return d;
+}
+
+Station* get_user_station(Station* st_db)
+{
+	char* st_id_str = get_user_string();
+	unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
+	Station* st = NULL;
+	if (st_id_unsigned) {
+		st = find_station_by_id(st_db, *st_id_unsigned);
+		
+	}
+	else
+	{
+		st = find_station_by_name(st_db, st_id_str);
+	}
+	if (!st)
+	{	//st does not exist
+		printf("station does not exist. ");
+		return NULL; // Return NULL if the station is not found
+	}
+	return st; // Return the station found or NULL if not found
 }
 
 
