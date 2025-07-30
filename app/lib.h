@@ -164,7 +164,7 @@ void release_car_from_port(Port* u_port, Station* st);
 //func 11: Remove out of order port
 int remove_out_of_order_port(Station* st, int num);
 int remOutOrderPort(Station* st_db);
-int remove_out_of_order_port_recursive(Station* st);
+
 
 //func 12: Remove Customer
 void remove_customer(DB_holder* db_holder);
