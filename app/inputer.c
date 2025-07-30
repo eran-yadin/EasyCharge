@@ -297,3 +297,14 @@ unsigned int get_charge_min(Date a, Date b)
 	
 	return diff_minutes > 0 ? diff_minutes : abs(diff_minutes); //return unsigned
 }
+
+portType get_port_type_from_user()
+{
+	int type;
+	do
+	{
+		printf("Enter Port Type (0 - FAST, 1 - MID, 2 - SLOW): ");
+		scanf("%d", &type);
+	} while (!is_valid(type, 2, 0));
+	return which_port_type_int(type);
+}

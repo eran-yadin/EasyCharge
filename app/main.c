@@ -17,10 +17,9 @@ int main() {
 	showOpening();
 	printf("welcome:\n");
 	int decision = 0;
-	DB_holder* DB = loadFiles();
 	do
 	{
-		//DB_holder* DB = loadFiles();
+		DB_holder* DB = loadFiles();
 		if (DB == NULL) {
 			//error code:
 			//see if needing fuc to create the DB_holder
@@ -30,6 +29,6 @@ int main() {
 		decision = menu_decision();
 		fun_executer(decision, DB);
 		//print_ALL_DB(DB->st_db);
-		//save_files(DB);
+		save_files(DB);
 	} while (decision != 0);
 }

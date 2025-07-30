@@ -34,6 +34,9 @@
 #define FUNC_0_exit 0
 
 #define CHARGE_COST 1.2
+#define OCCUPID_PORT 1 // Port status for occupied
+#define FREE_PORT 2 // Port status for free
+#define OUT_OF_ORDER_PORT 3 // Port status for out of order
 
 #define OUT_OF_ORDER_PORT 3 // Port status for out of order ports
 
@@ -169,7 +172,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		display_top_customer(db_holder);
 		break;
 	case FUNC_9_:
-		// Implement functionality for case 9
+		add_new_port(db_holder);
 		break;
 	case FUNC_10_:
 		Release_charging_ports(db_holder);
@@ -691,7 +694,66 @@ void print_top_customer(Car* top_customer)
 //run on all stations and find the top customer
 
 //func 9: Add new port
+void add_new_port(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
 
+	//get user station
+	printf("Enter Station ID or name: ");
+	Station* st = get_user_station(db_holder->st_db);
+	if (!st)
+	{
+		//st wasnt found
+		return;
+	}
+	portType type = get_port_type_from_user(); // Get the port type from the user
+	//create a new port
+	Port* new_port = malloc(sizeof(Port));
+	if (new_port == NULL) {
+		//error code: memory allocation failed
+		fprintf(stderr, "Memory allocation failed for new port.\n");
+		return;
+	}
+	new_port->num = st->nPorts + 1; // Assign a new port number
+	new_port->type = type; // Set the port type
+	Port* last_port = st->portList; // Get the head of the port list
+	while (last_port != NULL && last_port->next != NULL)
+	{
+		last_port = last_port->next; // Traverse to the end of the port list
+	}
+	if (last_port == NULL) {
+		st->portList = new_port; // If the port list is empty, set the new port as the head
+		new_port->num = 1;
+	}
+	else {
+		last_port->next = new_port; // Otherwise, add the new port to the end of the list
+		new_port->num = last_port->num + 1; // Assign the new port number
+	}
+	carNode* car_node = st->carQueue.front; // Get the head of the car queue
+	while (car_node != NULL && car_node->car->type != type)
+	{
+		car_node = car_node->next; // Find a car in the queue with the same type
+	}
+	if (car_node)
+	{
+		new_port->p2car = car_node->car; // Assign the car to the new port
+		remove_car_from_queue(st, car_node->car->nLicense); // Remove the car from the queue
+		car_node->car->pPort = new_port; // Assign the port to the car
+		new_port->status = OCCUPID_PORT; // Mark the port as occupied
+		printf("Car with license plate %s has been charged at port %d in station %s.\n",
+			car_node->car->nLicense, new_port->num, st->name);
+	}
+	else {
+		new_port->p2car = NULL; // If no car found, set the port's car pointer to NULL
+		new_port->status = FREE_PORT; // Mark the port as free
+	}
+	
+}
 
 //func 10: Release charging port FASE: TESTING
 void Release_charging_ports(DB_holder* db_holder)
@@ -839,7 +901,32 @@ int remOutOrderPort(Station* st_db)
 		printf("Port %d is not out of order or does not exist in station %s.\n", port_num, st_u->name);
 	}
 
+
 }
+int remove_out_of_order_port_recursive(Station* st)//function to remove ALL out of order ports
+	{
+		if (st == NULL)
+			return 0;
+
+		int total_removed = remove_out_of_order_port(st);
+
+		total_removed += remove_out_of_order_port_recursive(st->left);
+		total_removed += remove_out_of_order_port_recursive(st->right);
+
+		return total_removed;
+	}
+int remove_out_of_order_port_recursive(Station* st)//function to remove ALL out of order ports
+	{
+		if (st == NULL)
+			return 0;
+
+		int total_removed = remove_out_of_order_port(st);
+
+		total_removed += remove_out_of_order_port_recursive(st->left);
+		total_removed += remove_out_of_order_port_recursive(st->right);
+
+		return total_removed;
+	}
 
 
 

@@ -155,7 +155,7 @@ Car* find_top_customer(tCar* car_db);
 void print_top_customer(Car* top_customer);
 
 //func 9: Add new port
-
+void add_new_port(DB_holder* db_holder);
 
 //func 10: Release charging port
 void Release_charging_ports(DB_holder* db_holder);
@@ -164,7 +164,6 @@ void release_car_from_port(Port* u_port, Station* st);
 //func 11: Remove out of order port
 int remove_out_of_order_port(Station* st, int num);
 int remOutOrderPort(Station* st_db);
-
 
 //func 12: Remove Customer
 void remove_customer(DB_holder* db_holder);
