@@ -389,11 +389,13 @@ DB_holder checkCarStatus(DB_holder db)
 	if (user_car->pPort)//car in port
 	{
 		//add print func
+		//print using eran's func: port name,number,charge time
 	}
 
 	if (user_car->inqueue)
 	{
 		//add print func
+		//print using eran's func: port name,queue number (fast\middle\slow)
 	}
 
 
