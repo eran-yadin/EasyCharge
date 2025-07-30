@@ -286,7 +286,7 @@ void charge_car(DB_holder* db_holder)
 	{
 		char* st_id_str = get_user_string();
 		unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
-		if (st_id_unsigned && st_id_unsigned == 0)
+		if (st_id_unsigned && st_id_str[0] == '0')
 		{			// User chose to exit
 			printf("Exiting...\n");
 			wait_for_user();
@@ -456,13 +456,14 @@ void stop_charging(DB_holder* DB)
 	{
 		printf("Enter your car license plate (or 0 to exit): ");
 		char* user_lis = get_user_nLisence();
-		if (user_lis[0] == '0') // User chose to exit
+		if ( user_lis[7] == '0') // User chose to exit
 		{
 			printf("Exiting...\n");
 			wait_for_user();
 			return;
 		}
 		u_car = find_car(DB->car_db, user_lis);
+		if (!u_car) { printf("car with license: %s doesn't exist\n", user_lis); }
 	} while (!u_car);
 	
 	//car in port?
