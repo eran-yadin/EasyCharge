@@ -102,7 +102,6 @@ Station* get_user_station(Station* st_db)
 	return st; // Return the station found or NULL if not found
 }
 
-
 int is_valid(int val, int max, int min)
 {
     if (val>= min && val <= max)
@@ -134,12 +133,16 @@ coord get_user_coord()
 // This function prompts the user to enter a car ID and returns it as a 9-digit string.
 char* get_user_nLisence()
 {
-    int ID;
+	char buffer[256]; // 9 digits + null terminato
+	int ID;
     do
     {
         printf("Enter Car ID[8]: ");
-        scanf("%d", &ID);
-    } while (!(ID<99999999 && ID>0));
+        scanf("%s", &buffer);
+		int* lis = turn_string_to_us_int(buffer);
+		if (lis == NULL) { ID = -1; }
+		else { ID = *lis; } // Convert the string to an integer
+    } while (!(ID<99999999 && ID>=0));
 	char* car_id = malloc(10 * sizeof(char)); // 9 digits + null terminator
 	if (car_id == NULL) {
 		fprintf(stderr, "Memory allocation failed\n");
