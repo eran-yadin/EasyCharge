@@ -380,6 +380,7 @@ void charge_car(DB_holder* db_holder)
 		st->carQueue.rear->next = car_node; // Link the new car node at the end of the queue
 		st->carQueue.rear = car_node; // Update the rear pointer to the new car node
 		st->nCars++; // Increment the number of cars in the station
+		tcar->car->inqueue = 1;
 		printf("Car with license plate %s has been added to the queue in station %s.\n",
 			tcar->car->nLicense, st->name);
 	}
