@@ -132,4 +132,38 @@ void print_nearest_Station(Station* st, coord user_coord);
 
 //func 2:
 void charge_car(DB_holder* db_holder);
+
+//func 3:
+void checkCarStatus(DB_holder db);
+
+//func 4: stop charge
+void stop_charging(DB_holder* DB);
+
+//func 5: display all stations
+
+
+//func 6: display all cars in station
+
+
+//func 7: report of station's statistics
+
+
+//func 8: Display top customer
+
+
+//func 9: Add new port
+
+
+//func 10: Release charging port
+void Release_charging_ports(DB_holder* db_holder);
+void release_car_from_port(Port* u_port, Station* st);
+
+//func 11: Remove out of order port
+
+
+//func 12: Remove Customer
+
+
+//func 13: Close station
+
 #endif

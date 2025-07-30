@@ -1,5 +1,6 @@
 #ifndef _INPUTER_H
 #define _INPUTER_H
+
 #include "lib.h"
 #include "inputer.h"
 //get user input string
@@ -10,11 +11,12 @@ char *get_user_string();
 Date getCurrentDate();
 //print Date for testing
 
-void printDate(Date d);
 //get Date from user
 
 Date get_user_Data();
 //make sute the value is in the range
+
+Station* get_user_station(Station* st_db);
 
 int is_valid(int val, int max, int min);
 
@@ -34,4 +36,6 @@ unsigned get_user_st_ID();
 tCar* get_user_new_car();
 
 unsigned* turn_string_to_us_int(const char* str);
+
+unsigned int get_charge_min(Date a, Date b);
 #endif

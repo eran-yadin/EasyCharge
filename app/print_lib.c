@@ -3,6 +3,8 @@
 
 #include "lib.h"
 #include "print_lib.h"
+#include "inputer.h"
+#include "port.h"
 
 void print_menu()
 {
@@ -24,30 +26,16 @@ void print_menu()
 	printf("Please choose an option: (0-13): ");
 }
 
-void print_ALL_DB(Station* st_db)
+void print_ALL_DB(Station* st_db, int st_choise[7], int port_choise[5], int car_choise[5])
 {
-	if (st_db == NULL) {
+	if(st_db == NULL) {
 		printf("--------------------------\n\n\n\n");
 		return;
 	}
+	print_ALL_DB(st_db->left, st_choise, port_choise, car_choise);
+	print_station(st_db, st_choise, port_choise, car_choise);
+	print_ALL_DB(st_db->right, st_choise, port_choise, car_choise);
 
-	printf("Station ID: %d, Name: %s, Ports: %d, Cars: %d\n",
-		st_db->id, st_db->name, st_db->nPorts, st_db->nCars);
-	print_que_in_station(st_db);
-	if (st_db->portList != NULL) {
-		Port* current = st_db->portList;
-		while (current != NULL) {
-			printf("Port Number: %d, Type: %4s, Status: %d\n",
-				current->num, port_type_to_string(current->type), current->status);
-			current = current->next;
-		}
-	}
-	else {
-		printf("No ports available for this station.\n");
-	}
-
-	print_ALL_DB(st_db->left);
-	print_ALL_DB(st_db->right);
 }
 
 void print_que_in_station(Station* st_db)
@@ -174,4 +162,107 @@ void showOpening() {
 	printf("\\____/ \\__,_||___/ \\__, | \\____/|_| |_| \\__,_||_|   \\__, | \\___|\n");
 	printf("                    __/ |                            __/ |      \n");
 	printf("                   |___/                            |___/       \n");
+}
+
+void printDate(Date d) 
+{
+	printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
+}
+
+//print_choise[num,port_type,status,charge_time,car]
+void print_port(Port* port_p, int port_choise[6],int car_choise[5])
+{
+	if (!port_choise)
+	{
+		return;
+	}
+	if (port_choise[0])
+	{
+		printf("port number: %d\n", port_p->num);
+	}
+	if (port_choise[1])
+	{
+		printf("port type: %s\n", port_type_to_string(port_p->type));
+	}
+	if (port_choise[2])
+	{
+		printf("port_status: %d\n", port_p->status);
+	}
+	if (port_choise[3])
+	{
+		printf("charge time: %d min",get_charge_min(port_p->tin,getCurrentDate()));
+		
+	}
+	if (port_choise[4])
+	{
+		print_car(port_p->p2car, car_choise, NULL);
+	}
+}
+//print_choise[nLicense,type,totalPayed,inqueu,port]
+void print_car(Car* car_p, int car_choise[5],int port_choise[5])
+{
+	if (!car_choise)
+	{
+		return;
+	}
+	if (car_choise[0])
+	{
+		printf("car license: %d\n", car_p->nLicense);
+	}
+	if (car_choise[1])
+	{
+		printf("charge type: %s\n", port_type_to_string(car_p->type));
+	}
+	if (car_choise[2])
+	{
+		printf("tatal paid: %lf\n",car_p->totalPayed);
+	}
+	if (car_choise[3])
+	{
+		if (car_p->inqueue)
+		{
+			printf("car is inqueue\n");
+		}
+		else
+		{
+			printf("car is NOT inqueue\n");
+		}
+	}
+	if (car_choise[4])
+	{
+		print_port(car_p->pPort, port_choise,NULL);
+	}
+}
+//print_choise[id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue]
+void print_station(Station* st,int st_choise[8], int port_choise[5], int car_choise[5])
+{
+	if (!st)
+	{
+		return;
+	}
+	(st_choise[0]) ? printf("station ID: %d\n", st->id) : 0;
+	(st_choise[1]) ? printf("station name: %s\n", st->name) : 0;
+	(st_choise[2]) ? printf("number of ports: %d\n", st->nPorts) : 0;
+	(st_choise[3]) ? print_coord(convert_coord(st->coord[0], st->coord[1])) : 0;
+	(st_choise[4]) ? printf("number of cars: %d\n", st->nCars) : 0;
+	if(st_choise[5])
+	{
+		printf("Ports in Station:\n");
+		print_port_in_st(st);
+	}
+	if (st_choise[6])
+	{
+		int count = num_cars_in_queue(st);
+		printf("Number of Cars in Queue: %d\n",  count);
+	}
+	if(st_choise[7])
+	{
+		printf("Cars in Queue:\n");
+		carNode* current = st->carQueue.front;
+		while (current != NULL)
+		{
+			print_car(current->car, car_choise, NULL);
+			current = current->next;
+		}
+	}
 }

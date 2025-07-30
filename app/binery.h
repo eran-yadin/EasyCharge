@@ -14,6 +14,8 @@ Station* find_station_by_id(Station* head, unsigned id);
 
 Station* find_station_by_name(Station* head, const char* name);
 
+Station* find_station_by_car(Station* head, const char* n_lic);
+
 void write_st_to_file(Station* st_db, char* file_name);
 
 void write_st_to_file_rec(Station* st_db, FILE* pf);

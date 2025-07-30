@@ -8,7 +8,7 @@
 #include "lib.h"
 #include "inputer.h"
 #include "print_lib.h"
-#include "binary.h"
+#include "binery.h"
 #include "port.h"
 
 char *get_user_string()
@@ -42,11 +42,6 @@ Date getCurrentDate() {
     currentDate.Min   = (short)timeinfo->tm_min;
 
     return currentDate;
-}
-
-
-void printDate(Date d) {
-    printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
 }
 
 
@@ -84,6 +79,27 @@ Date get_user_Data() {
     } while (!is_valid(d.Min,59,0));
     
     return d;
+}
+
+Station* get_user_station(Station* st_db)
+{
+	char* st_id_str = get_user_string();
+	unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
+	Station* st = NULL;
+	if (st_id_unsigned) {
+		st = find_station_by_id(st_db, *st_id_unsigned);
+		
+	}
+	else
+	{
+		st = find_station_by_name(st_db, st_id_str);
+	}
+	if (!st)
+	{	//st does not exist
+		printf("station does not exist. ");
+		return NULL; // Return NULL if the station is not found
+	}
+	return st; // Return the station found or NULL if not found
 }
 
 
@@ -260,5 +276,5 @@ unsigned int get_charge_min(Date a, Date b)
 	unsigned int diff_minutes = (unsigned int)(diff_seconds / 60.0);// convert to minutes
 
 	
-	return diff_minutes > 0 ? diff_minutes : -diff_minutes; //return unsigned
+	return diff_minutes > 0 ? diff_minutes : abs(diff_minutes); //return unsigned
 }

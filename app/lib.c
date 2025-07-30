@@ -20,9 +20,9 @@
 // Define function codes for menu options
 #define FUNC_1_locate_nearest_station 1
 #define FUNC_2_charge_car 2
-#define FUNC_3_ 3
-#define FUNC_4_ 4
-#define FUNC_5_ 5
+#define FUNC_3_check_car_statue 3
+#define FUNC_4_stop_charge 4
+#define FUNC_5_display_all_stations 5
 #define FUNC_6_ 6
 #define FUNC_7_ 7
 #define FUNC_8_ 8
@@ -33,6 +33,12 @@
 #define FUNC_13_ 13
 #define FUNC_0_exit 0
 
+#define CHARGE_COST 1.2
+
+//print settings
+//print_ALL_DB
+#define st_choise_des {1, 1, 1, 1, 1, 1, 1, 0} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
+#define st_port_des {1, 1, 1, 1, 1}
 
 
 //load all files to the app
@@ -119,6 +125,9 @@ void free_DB_holder(DB_holder* db_holder)
 
 void fun_executer(int decision, DB_holder* db_holder)
 {
+	
+	
+	int st_car[5] = {0,0,0,0,0};
 	if (db_holder == NULL) {
 		//error code:
 		fprintf(stderr, "Database holder is NULL.\n");
@@ -132,15 +141,18 @@ void fun_executer(int decision, DB_holder* db_holder)
 	case FUNC_2_charge_car:
 		charge_car(db_holder);
 		break;
-	case FUNC_3_:
-		// Implement functionality for case 3
+	case FUNC_3_check_car_statue:
+		checkCarStatus(*db_holder); // Check car status
 		break;
-	case FUNC_4_:
-		// Implement functionality for case 4
+	case FUNC_4_stop_charge:
+		stop_charging(db_holder);
 		break;
-	case FUNC_5_:
-		// Implement functionality for case 5
+	case FUNC_5_display_all_stations: {
+		int st_choise[] = st_choise_des;
+		int port_choise[] = st_port_des;
+		print_ALL_DB(db_holder->st_db, st_choise, port_choise, NULL);
 		break;
+	}
 	case FUNC_6_:
 		// Implement functionality for case 6
 		break;
@@ -174,7 +186,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 	}
 }
 
-//func 1: locate nearest station
+//func 1: locate nearest station FASE: TESTING
 Station* locNearSt(Station* st_db)
 {
 	printf("\nenter coordinates: \n");
@@ -257,7 +269,7 @@ void print_nearest_Station(Station* st,coord user_coord)
 	}
 }
 
-//func 2: add new station
+//func 2: add new station FASE: TESTING
 void charge_car(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
@@ -377,40 +389,132 @@ void charge_car(DB_holder* db_holder)
 }
 
 
-//func 3: check car status
-DB_holder checkCarStatus(DB_holder db)
+//func 3: check car status FASE: TESTING
+void checkCarStatus(DB_holder db)
 {
 	Car* user_car = get_user_nLisence();
 	user_car = find_car(db.car_db, user_car->nLicense);
 
 	if (user_car == NULL)//dont find car
+	{
 		printf("car is not found :(\n");//optional- ask user what to do next
+		return;
+	}
 	
 	if (user_car->pPort)//car in port
 	{
-		//add print func
-		//print using eran's func: port name,number,charge time
+		//get station
+		Station* st = find_station_by_car(db.st_db, user_car->nLicense);
+		if (st == NULL) {
+			printf("station not found for car %s\n", user_car->nLicense);
+			return;
+		}
+		printf("car is charging in station %s\n", st->name);
+		int port[5] = { 1, 0, 0, 1, 0 };
+		print_port(user_car->pPort, port,NULL);
+		return;
 	}
 
 	if (user_car->inqueue)
 	{
+		//get station
+		Station* st = find_station_by_car(db.st_db, user_car->nLicense);
 		//add print func
-		//print using eran's func: port name,queue number (fast\middle\slow)
+		int que = how_long_car_que(st, user_car->nLicense);
+		printf("car in place %d is in queue for charging in station %s\n", que,st->name);
+		return;
 	}
-
-
+	printf("car is not charging and not in queue\n");
+	return;
 }
 
 
+//func 4: stop charge FASE: TESTING
+void stop_charging(DB_holder* DB)
+{
+	//check DB
+	if (DB == NULL || DB->car_db == NULL || DB->st_db == NULL)
+	{
+		return; //error code: DB is NULL
+	}
 
+	//get user data
+	char* nLisence = get_user_nLisence();
+	
+	//find car
+	Car* u_car = find_car(DB->car_db, nLisence);
+	//car exist?
+	if (u_car == NULL)
+	{
+		printf("\ncar was not found\n");
+		return; //error code: car not found
+	}
+	//car in port?
+	if (u_car->pPort == NULL)
+	{
+		printf("\ncar is not charging\n");
+		return; //error code: car is not charging
+	}
+	//car exit and in port
+	Station* st = find_station_by_car(DB->st_db, u_car->nLicense);
+	if (st == NULL)
+	{
+		printf("\nstation was not found\n");
+		return; //error code: station not found
+	}
 
-
-
-//func 4: stop charge
+	carNode* car_node = st->carQueue.front;
+	//find car in queue with same type
+	while( car_node != NULL && car_node->car->type != u_car->type)
+	{
+		car_node = car_node->next;
+	}
+	Port* correct_port = st->portList; // Get the port where the car is charging
+	while (correct_port != NULL && correct_port->p2car != u_car)
+	{
+		correct_port = correct_port->next; // Find the port where the car is charging
+	}
+	if (correct_port == NULL) {
+		printf("Car is not charging in any port.\n");
+		return; //error code: car is not charging
+	}
+	// Calculate the total time charged
+	int unsigned time_charged = get_charge_min(correct_port->tin, getCurrentDate());
+	float charge_cost = 0.0;
+	charge_cost = time_charged * CHARGE_COST;
+	u_car->totalPayed += charge_cost; // Update the total amount paid by the car
+	u_car->pPort = NULL; // Remove the car from the port
+	if (car_node != NULL)
+	{
+		correct_port->p2car = car_node->car;
+		remove_car_from_queue(st, car_node->car->nLicense); // Remove the car from the queue
+		car_node->car->pPort = correct_port; // Assign the port to the car
+	}else
+	{
+				correct_port->p2car = NULL; // Set the port's car pointer to NULL
+				correct_port->status = 2; // Mark the port as free
+	}
+	//debug tool
+	printf("Car with license plate %s has stopped charging.\n", u_car->nLicense);
+	printf("Total time charged: %d minutes.\n", time_charged);
+	printf("Total amount paid: %.2f.\n", u_car->totalPayed);
+	printf("Port %d in station %s ", correct_port->num, st->name);
+	if(car_node != NULL)
+	{
+		printf("is now occupied by car with license plate %s.\n", car_node->car->nLicense);
+	}
+	else
+	{
+		printf("is now free.\n");
+	}
+	
+	// Update the station's number of cars
+	return; // Successfully stopped charging
+}
 
 
 //func 5: display all stations
-
+// print_ALL_DB
 
 //func 6: display all cars in station
 
@@ -420,12 +524,89 @@ DB_holder checkCarStatus(DB_holder db)
 
 //func 8: Display top customer
 
+//run on all stations and find the top customer
 
 //func 9: Add new port
 
 
-//func 10: Release charging port
+//func 10: Release charging port FASE: TESTING
+void Release_charging_ports(DB_holder* db_holder)
+{
+	// Check if db_holder is NULL
+	if (db_holder == NULL) {
+		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
+		return;
+	}
+	//get user station ID 
+	printf("Enter Station ID: ");
+	Station* st = get_user_station(db_holder->st_db);
+	if (!st)
+	{
+		//st wasnt found
+		return;
+	}
+	Port* u_port = st->portList; // Get the head of the port list
+	while (u_port != NULL)
+	{
+		if (u_port->status == 3) { continue; }
+		if (u_port->p2car) {
+			int unsigned time_charged = get_charge_min(u_port->tin, getCurrentDate());
+			if(time_charged >= 30) // Check if the car has been charging for at least 30 minutes
+			{
+				release_car_from_port(u_port, st); // Release the car from the port
+			}
+		}
+		u_port = u_port->next; // Move to the next port in the list
+	}
+}
 
+//need to be tested
+void release_car_from_port(Port* u_port,Station* st)
+{
+	Car* u_car = u_port->p2car; // Get the car from the port
+	carNode* car_node = st->carQueue.front;
+	//find car in queue with same type
+	while (car_node != NULL && car_node->car->type != u_car->type)
+	{
+		car_node = car_node->next;
+	}
+	Port* correct_port = u_port; // Get the port where the car is charging
+	
+	// Calculate the total time charged
+	int unsigned time_charged = get_charge_min(correct_port->tin, getCurrentDate());
+	float charge_cost = 0.0;
+	charge_cost = time_charged * CHARGE_COST;
+	u_car->totalPayed += charge_cost; // Update the total amount paid by the car
+	u_car->pPort = NULL; // Remove the car from the port
+	if (car_node != NULL)
+	{
+		correct_port->p2car = car_node->car;
+		remove_car_from_queue(st, car_node->car->nLicense); // Remove the car from the queue
+		car_node->car->pPort = correct_port; // Assign the port to the car
+	}
+	else
+	{
+		correct_port->p2car = NULL; // Set the port's car pointer to NULL
+		correct_port->status = 2; // Mark the port as free
+	}
+	//debug tool
+	printf("Car with license plate %s has stopped charging.\n", u_car->nLicense);
+	printf("Total time charged: %d minutes.\n", time_charged);
+	printf("Total amount paid: %.2f.\n", u_car->totalPayed);
+	printf("Port %d in station %s ", correct_port->num, st->name);
+	if (car_node != NULL)
+	{
+		printf("is now occupied by car with license plate %s.\n", car_node->car->nLicense);
+	}
+	else
+	{
+		printf("is now free.\n");
+	}
+
+	// Update the station's number of cars
+	return; // Successfully stopped charging
+}
 
 //func 11: Remove out of order port
 

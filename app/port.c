@@ -423,3 +423,77 @@ Port* is_port_type_exist(Station* st_db, portType port)
 	}
 }
 
+carNode* remove_car_from_queue(Station* st_db, const char* license) 
+{
+	if (st_db == NULL || st_db->carQueue.front == NULL) {
+		return NULL; // Return NULL if the station or queue is empty
+	}
+	carNode* current = st_db->carQueue.front;
+	carNode* previous = NULL;
+	while (current != NULL) {
+		if (strcmp(current->car->nLicense, license) == 0) { // Check if the car license matches
+			if (previous == NULL) {
+				st_db->carQueue.front = current->next; // Remove from front
+			} else {
+				previous->next = current->next; // Remove from middle or end
+			}
+			if (current == st_db->carQueue.rear) {
+				st_db->carQueue.rear = previous; // Update rear if necessary
+			}
+			return current; // Return the removed car node
+		}
+		previous = current;
+		current = current->next; // Move to the next car in the queue
+	}
+	return NULL; // Return NULL if the car was not found in the queue
+}
+
+int how_long_car_que(Station* st, const char* license) 
+{
+
+	if (st == NULL || license == NULL) {
+		return -1; // Return -1 if the station or queue is empty
+	}
+	
+	Car* car = find_station_by_car(st, license);
+	if (!car)
+	{
+		return;
+	}
+	if (car->inqueue == 0)
+	{
+		printf("Car with license %s is not in the queue.\n", license);
+		return;
+	}
+	Station* station = find_station_by_car(st, license);
+	if (!station)
+	{
+		return;
+	}
+	int position = 0;
+	carNode* current = station->carQueue.front;
+	while (current != NULL) {
+		if (strcmp(current->car->nLicense, license) == 0) { // Check if the car license matches
+			return position+1; // Return the position of the car in the queue
+		}
+		if (current->car->type == car->type) {
+			position++; // Increment position only if the car type matches
+		}
+		current = current->next; // Move to the next car in the queue
+	}
+	return -1; // Return -1 if the car was not found in the queue
+}
+
+int num_cars_in_queue(Station* st) 
+{
+	if (st == NULL) {
+		return 0; // Return 0 if the station is NULL
+	}
+	int count = 0;
+	carNode* current = st->carQueue.front;
+	while (current != NULL) {
+		count++;
+		current = current->next; // Move to the next car in the queue
+	}
+	return count; // Return the count of cars in the queue with the specified type
+}
