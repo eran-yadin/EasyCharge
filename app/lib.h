@@ -143,10 +143,11 @@ void stop_charging(DB_holder* DB);
 
 
 //func 6: display all cars in station
-
+void display_all_cars_in_station(DB_holder* db_holder);
 
 //func 7: report of station's statistics
-
+void report_station_statistics(DB_holder* db_holder);
+void print_station_statistics(Station* st);
 
 //func 8: Display top customer
 Car* display_top_customer(DB_holder* db_holder);
@@ -166,8 +167,9 @@ int remOutOrderPort(Station* st_db);
 int remove_out_of_order_port_recursive(Station* st);
 
 //func 12: Remove Customer
-
+void remove_customer(DB_holder* db_holder);
 
 //func 13: Close station
+void close_station(DB_holder* db_holder);
 
 #endif

@@ -26,6 +26,8 @@ void free_st_db(Station* st_db);
 
 void free_car_queue(qCar* queue);
 
+Station* free_st_rec(Station* st_db, Station* st);
+
 //--------car_db & tCar: func---------
 car_db* get_db_car_from_file(FILE* pf);
 
