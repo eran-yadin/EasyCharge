@@ -10,6 +10,7 @@
 #include "port.h"
 #include "print_lib.h"
 #include "inputer.h"
+#include "error_handle.h"
 
 //---------station tree func----------
 // 
@@ -20,11 +21,15 @@ Station* read_s_one_f_f(FILE *pf)
 	fgets(buffer, sizeof(buffer), pf); 
 	Station* station = malloc(sizeof(Station));
 	if (station == NULL) {
+		log_error(1001,"Memory allocation failed in *station in read_s_one_f_f");
 		fprintf(stderr, "Memory allocation failed\n");
 		return NULL;
 	}
+	station->portList = NULL;
 	char name_b[200];
-	sscanf(buffer, "%u,%99[^,],%d,%lf,%lf", &station->id, name_b, &station->nPorts, &station->coord[0], &station->coord[1]);
+	int res = sscanf(buffer, "%u,%99[^,],%d,%lf,%lf", &station->id, name_b, &station->nPorts, &station->coord[0], &station->coord[1]);
+	if(res!= 5 ){log_error(5, "Failed to read station data from file in read_s_one_f_f");}//continue
+	trim_newline(name_b); // Remove newline character if present
 	station->name = malloc(strlen(name_b) + 1);
 	if (station->name == NULL) {
 		fprintf(stderr, "Memory allocation failed for station name\n");
@@ -47,7 +52,7 @@ Station* read_st_from_file(char const *file_name)
 {
 	FILE* pf = fopen(file_name, "r");
 	if (pf == NULL) {
-		//error code: 
+		log_error(5000, "Could not open file for reading in read_st_from_file");
 		perror("fopen");  // Prints system error
 		return NULL;
 	}
@@ -59,7 +64,7 @@ Station* read_st_from_file(char const *file_name)
 	do{
 		Station* station = read_s_one_f_f(pf);
 		if (station == NULL) {
-			//error code: 
+			log_error(1001, "Failed to read station data from file in read_st_from_file");
 			continue; // skip bad lines
 		}
 		if (feof(pf)) { break; }
@@ -91,7 +96,7 @@ Station* add_to_stationDB(Station* head, Station* new_station) {
 Station* create_station(unsigned id, const char* name, int nPorts, double coordX, double coordY) {
 	Station* s = malloc(sizeof(Station));
 	if (!s) {
-		//error code:
+		log_error(1001, "Memory allocation failed for Station in create_station");
 		fprintf(stderr, "Memory allocation failed\n");
 		exit(EXIT_FAILURE);
 	}
@@ -101,6 +106,7 @@ Station* create_station(unsigned id, const char* name, int nPorts, double coordX
 	if (s->name) {
 		strcpy(s->name, name);
 	}
+	s->portList = NULL;
 	s->nPorts = nPorts;
 	s->coord[0] = coordX;
 	s->coord[1] = coordY;
@@ -220,7 +226,7 @@ void write_st_to_file(Station* st_db, char* file_name)
 {
 	FILE* pf = fopen(file_name, "w");
 	if (pf == NULL) {
-		//error code:
+		log_error(5000, "Could not open file for writing in write_st_to_file");
 		return;
 	}
 	fprintf(pf, "ID,StationName,NumOfPorts,CoordX,CoordY\n"); // Write header
@@ -306,6 +312,7 @@ Station* free_st_rec(Station* st_db,Station* st)
 			// Deep copy the name
 			char* new_name = malloc(strlen(successor->name) + 1);
 			if (new_name == NULL) {
+				log_error(1001, "Memory allocation failed for new station name in free_st_rec");
 				fprintf(stderr, "Memory allocation failed for new station name\n");
 				return NULL; // Handle memory allocation failure
 			}
@@ -334,13 +341,13 @@ car_db* get_db_car_from_file(FILE* pf)
 	char buffer[256];
 	car_db* head = malloc(sizeof(car_db));
 	if (head == NULL) {
-		//error code:
+		log_error(1001, "Memory allocation failed for car_db in get_db_car_from_file");
 		fprintf(stderr, "Memory allocation failed\n");
 		return NULL;
 	}
 	fgets(buffer, sizeof(buffer), pf); // Skip header line
 	if (feof(pf)) {
-		//error code:
+		log_error(5, "File is empty or only has header in get_db_car_from_file");
 		free(head);
 		return NULL; // Return NULL if file is empty or only has header
 	}
@@ -348,7 +355,10 @@ car_db* get_db_car_from_file(FILE* pf)
 	char n_ls[10];
 	n_ls[sizeof(n_ls) - 1] = '\0';  // Force null-termination
 	char mod[5];
-	sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod, &head->totalPayed, &head->st_id,&head->port,&head->inqueue);
+	int res = sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod, &head->totalPayed, &head->st_id,&head->port,&head->inqueue);
+	if (res != 6) {
+		log_error(5, "Failed to read car data from file in get_db_car_from_file");
+	}
 	strcpy(head->nLicense, n_ls);
 	head->type = which_port_type_st(mod);
 	head->next = NULL; // Initialize the next pointer to NULL
@@ -364,8 +374,13 @@ car_db* get_db_car_from_file(FILE* pf)
 			free(head);
 			return NULL;
 		}
-		sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod,
+		res = sscanf(buffer, "%10[^,],%4[^,],%lf,%d,%d,%d", &n_ls, &mod,
 			&new_car->totalPayed, &new_car->st_id, &new_car->port, &new_car->inqueue);
+		if(res != 6) {
+			log_error(5, "Failed to read car data from file in get_db_car_from_file");
+			free(new_car);
+			continue; // Skip this line if data is not read correctly
+		}
 		strcpy(new_car->nLicense, n_ls);
 		new_car->type = which_port_type_st(mod);
 		new_car->next = NULL;
@@ -430,7 +445,7 @@ tCar* rec_add_to_tree(tCar* head, tCar* new_tCar) {
 //remove a car from tCar binary tree by license number
 tCar* remove_from_tCar(tCar* head, const char* nLicense) {
 	if (head == NULL) {
-		return NULL; // Not found
+		return NULL; // Not found//base case
 	}
 
 	if (strcmp(nLicense, head->car->nLicense) < 0) {
@@ -469,7 +484,7 @@ void free_tCar_db(tCar* head)
 {
 	if (!head)
 	{
-		//error code:
+		//base case
 		return;
 	}
 	free_tCar_db(head->left);
@@ -512,8 +527,7 @@ tCar* get_tCar_from_file(char const *file_name)
 {
 	FILE* pf = fopen(file_name, "r");
 	if (!pf) {
-		//error code: 1041
-		printf("memo prob!!!");
+		log_error(5000, "Could not open file for reading in get_tCar_from_file");
 		exit(1);
 	}
 
@@ -551,6 +565,7 @@ void free_car_linked_list(car_db* head)
 Car* find_car(tCar* car_db, char* nlis) 
 {
 	if (car_db == NULL) {
+		//base case
 		return NULL; // Tree is empty
 	}
 	if (strcmp(nlis, car_db->car->nLicense) == 0)
@@ -626,12 +641,11 @@ void write_tCar_to_file(tCar* head,Station* st_db, char const* file_name)
 {
 	FILE* pf = fopen(file_name, "w");
 	if (pf == NULL) {
-		//error code:
+		log_error(5000, "Could not open file for writing in write_tCar_to_file");
 		return;
 	}
 	fprintf(pf, "License,PortType,TotalPayed,StationID,PortNumber,InQueue\n"); // Write header
 	write_tCar_to_file_rec(head,st_db ,pf);
-	//delete_last_two_lines(pf); // Remove the last two lines (empty line and header)
 	fclose(pf);
 }
 
@@ -656,12 +670,15 @@ void write_tCar_to_file_rec(tCar* head,Station *st_db, FILE* pf)
 int find_st_id_by_licanse(Station* st_db, char const* license) 
 {
 	if (st_db == NULL) {
+		//base case
 		return 0; // Not found
 	}
 	Port* current_port = st_db->portList;
 	while (current_port != NULL) {
-		if (current_port->p2car != NULL && strcmp(current_port->p2car->nLicense, license) == 0) {
-			return st_db->id; // Found the car in this station
+		if (current_port->p2car != NULL) {
+			if (strcmp(current_port->p2car->nLicense, license) == 0) {
+				return st_db->id; // Found the car in this station
+			}
 		}
 		current_port = current_port->next;
 	}

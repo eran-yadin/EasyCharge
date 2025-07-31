@@ -21,7 +21,7 @@ int main() {
 		DB_holder* DB = loadFiles();
 		if (DB == NULL) {
 			
-			//see if needing fuc to create the DB_holder
+			log_error(9999, "Failed to load database in main");
 			fprintf(stderr, "Failed to load database.\n");
 			return EXIT_FAILURE;
 		}
