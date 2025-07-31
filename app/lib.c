@@ -169,7 +169,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		report_station_statistics(db_holder);
 		break;
 	case FUNC_8_:
-		display_top_customer(db_holder);
+		find_top_customer_five(db_holder);
 		break;
 	case FUNC_9_:
 		add_new_port(db_holder);
@@ -295,7 +295,7 @@ void charge_car(DB_holder* db_holder)
 	{
 		char* st_id_str = get_user_string();
 		unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
-		if (st_id_unsigned && st_id_str[0] == '0')
+		if (st_id_unsigned && is_str_0(st_id_str))
 		{			// User chose to exit
 			printf("Exiting...\n");
 			wait_for_user();
@@ -407,7 +407,7 @@ void checkCarStatus(DB_holder db)
 	{
 		printf("Enter your car license plate (or 0 to exit): ");
 		char* user_lis = get_user_nLisence();
-		if(user_lis[0] == '0') // User chose to exit
+		if(is_str_0(user_lis)) // User chose to exit
 		{
 			printf("Exiting...\n");
 			wait_for_user();
@@ -640,43 +640,76 @@ void print_station_statistics(Station* st)
 }
 
 //func 8: Display top customer
-Car* display_top_customer(DB_holder* db_holder)
+void find_top_customer_five(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
 		//error code:
+		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
-	Car* top_customer = find_top_customer(db_holder->car_db);
-	if (top_customer == NULL) {
-		//error code: no customers found
-		return NULL;
+	//get user station ID 
+	tCar* car_db = db_holder->car_db;
+	if (!car_db)
+	{
+		//st wasnt found
+		return;
 	}
-	print_top_customer(top_customer);
+	Car* top_five_customer[5] = { NULL, NULL, NULL, NULL, NULL }; // Array to hold top 5 customers
+	for (size_t i = 0; i < 5; i++)
+	{
+		top_five_customer[i] = find_top_customer(car_db, top_five_customer);
+	}
+	for (size_t i = 0; i < 5; i++)
+	{
+		print_top_customer(top_five_customer[i]);
+	}
+	wait_for_user();
+	printf("\n\n\n");
 }
 
-Car* find_top_customer(tCar* car_db)
+Car* find_top_customer(tCar* car_db,Car *top_five_cust[5])
 {
-	if (car_db == NULL) {
-		//end of line
+	if(car_db == NULL) {
+		//base case: if the tree is empty
+		return NULL;
+	}
+	if (car_db->car == NULL) {
+		fprintf(stderr, "Car record is missing.\n");
+		return NULL;
+	}
+	if( top_five_cust == NULL) {
+		fprintf(stderr, "Top five customers array is NULL.\n");
 		return NULL;
 	}
 	Car* top_customer = car_db->car;
-	float max_payment = top_customer->totalPayed;
-	Car* left_top = find_top_customer(car_db->left);
-	if((left_top != NULL)? left_top->totalPayed > max_payment:0)
-	{
-		top_customer = left_top;
-		max_payment = top_customer->totalPayed;
+	float max_amount = 0;
+	if (is_in_top_five(top_customer, top_five_cust)) {
+		top_customer = NULL;
+		max_amount = 0;
 	}
-	Car* right_top = find_top_customer(car_db->right);
-	if((right_top != NULL) ? right_top->totalPayed > max_payment:0)
-	{
-		top_customer = right_top;
-		max_payment = top_customer->totalPayed;
+	else { max_amount = top_customer->totalPayed; }
+
+	Car* left_c = find_top_customer(car_db->left, top_five_cust);
+	if (left_c != NULL && left_c->totalPayed > max_amount) {
+		max_amount = left_c->totalPayed;
+		top_customer = left_c;
+	}
+	Car* right_c = find_top_customer(car_db->right, top_five_cust);
+	if (right_c != NULL && right_c->totalPayed > max_amount) {
+		max_amount = right_c->totalPayed;
+		top_customer = right_c;
 	}
 	return top_customer;
 }
+
+int is_in_top_five(Car* car, Car* top_five[5]) {
+	for (int i = 0; i < 5; i++) {
+		if (car == top_five[i]) return 1;
+	}
+	return 0;
+}
+
 
 void print_top_customer(Car* top_customer)
 {
@@ -689,7 +722,6 @@ void print_top_customer(Car* top_customer)
 	printf("Total Amount Paid: %.2f\n", top_customer->totalPayed);
 	printf("Car Type: %d\n", top_customer->type);
 	printf("----------------------------\n");
-	wait_for_user();
 }
 //run on all stations and find the top customer
 
@@ -901,8 +933,10 @@ int remOutOrderPort(Station* st_db)
 		printf("Port %d is not out of order or does not exist in station %s.\n", port_num, st_u->name);
 	}
 
-
 }
+
+
+
 
 
 

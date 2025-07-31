@@ -112,6 +112,19 @@ int is_valid(int val, int max, int min)
 	return 0;
 }
 
+int is_str_0(char* const str)
+{
+	if (str == NULL || strlen(str) == 0) {
+		return 1; // String is empty or NULL
+	}
+	for (int i = 0; i < strlen(str); i++) {
+		if (str[i] != '0') {
+			return 0; // String contains characters other than '0'
+		}
+	}
+	return 1; // String contains only '0's
+}
+
 //TODO: test
 coord get_user_coord()
 {

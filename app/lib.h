@@ -150,9 +150,10 @@ void report_station_statistics(DB_holder* db_holder);
 void print_station_statistics(Station* st);
 
 //func 8: Display top customer
-Car* display_top_customer(DB_holder* db_holder);
-Car* find_top_customer(tCar* car_db);
+void find_top_customer_five(DB_holder* db_holder);
+Car* find_top_customer(tCar* car_db, Car* top_five_cust[5]);
 void print_top_customer(Car* top_customer);
+int is_in_top_five(Car* car, Car* top_five[5]);
 
 //func 9: Add new port
 void add_new_port(DB_holder* db_holder);
