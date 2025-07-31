@@ -903,31 +903,6 @@ int remOutOrderPort(Station* st_db)
 
 
 }
-int remove_out_of_order_port_recursive(Station* st)//function to remove ALL out of order ports
-	{
-		if (st == NULL)
-			return 0;
-
-		int total_removed = remove_out_of_order_port(st);
-
-		total_removed += remove_out_of_order_port_recursive(st->left);
-		total_removed += remove_out_of_order_port_recursive(st->right);
-
-		return total_removed;
-	}
-int remove_out_of_order_port_recursive(Station* st)//function to remove ALL out of order ports
-	{
-		if (st == NULL)
-			return 0;
-
-		int total_removed = remove_out_of_order_port(st);
-
-		total_removed += remove_out_of_order_port_recursive(st->left);
-		total_removed += remove_out_of_order_port_recursive(st->right);
-
-		return total_removed;
-	}
-
 
 
 
