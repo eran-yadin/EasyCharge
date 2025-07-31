@@ -12,7 +12,6 @@
 #include "error_handle.h"
 
 
-
 int main() {
 	showOpening();
 	printf("welcome:\n");
@@ -21,11 +20,12 @@ int main() {
 	{
 		DB_holder* DB = loadFiles();
 		if (DB == NULL) {
-			//error code:
+			
 			//see if needing fuc to create the DB_holder
 			fprintf(stderr, "Failed to load database.\n");
 			return EXIT_FAILURE;
 		}
+		log_error(11);
 		decision = menu_decision();
 		fun_executer(decision, DB);
 		//print_ALL_DB(DB->st_db);

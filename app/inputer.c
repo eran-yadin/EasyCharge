@@ -269,7 +269,7 @@ unsigned* turn_string_to_us_int(const char* str)
 			return NULL; // Return NULL if invalid character found
 		}
 		int temp = (str[i] - '0');
-		sum = sum+ pow(10,u)*(str[i] - '0');
+		sum = sum+ (int)(pow(10,u)*(str[i] - '0'));
 		u++; i--;
 	}
 	p = &sum;

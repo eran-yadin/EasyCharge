@@ -47,7 +47,7 @@ Station* read_st_from_file(char const *file_name)
 {
 	FILE* pf = fopen(file_name, "r");
 	if (pf == NULL) {
-		//error code:
+		//error code: 
 		perror("fopen");  // Prints system error
 		return NULL;
 	}
@@ -59,7 +59,7 @@ Station* read_st_from_file(char const *file_name)
 	do{
 		Station* station = read_s_one_f_f(pf);
 		if (station == NULL) {
-			//error code:
+			//error code: 
 			continue; // skip bad lines
 		}
 		if (feof(pf)) { break; }
@@ -305,6 +305,10 @@ Station* free_st_rec(Station* st_db,Station* st)
 
 			// Deep copy the name
 			char* new_name = malloc(strlen(successor->name) + 1);
+			if (new_name == NULL) {
+				fprintf(stderr, "Memory allocation failed for new station name\n");
+				return NULL; // Handle memory allocation failure
+			}
 			strcpy(new_name, successor->name);
 			st_db->name = new_name;
 
@@ -312,10 +316,14 @@ Station* free_st_rec(Station* st_db,Station* st)
 			return st_db;
 
 		}
+		
+	}
+	else {
 		st_db->left = free_st_rec(st_db->left, st);
 		st_db->right = free_st_rec(st_db->right, st);
 		return st_db; // Exit the function after freeing
 	}
+	
 }
 
 //--------car_db & tCar: func---------
@@ -370,7 +378,7 @@ car_db* get_db_car_from_file(FILE* pf)
 //insert a new car into the car_db linked list (car_db is a linked list)
 void insert_car_db(car_db* head, car_db* new_car) {
 	if (head == NULL) {
-		return new_car;
+		return ;
 	}
 	while (head->next != NULL) {
 		head = head->next;
@@ -504,7 +512,7 @@ tCar* get_tCar_from_file(char const *file_name)
 {
 	FILE* pf = fopen(file_name, "r");
 	if (!pf) {
-		//error code:
+		//error code: 1041
 		printf("memo prob!!!");
 		exit(1);
 	}
@@ -552,7 +560,7 @@ Car* find_car(tCar* car_db, char* nlis)
 	if (strcmp(nlis, car_db->car->nLicense) < 0) {
 		return find_car(car_db->left, nlis); // Search in left subtree
 	}
-	else if (strcmp(nlis, car_db->car->nLicense) > 0) {
+	else {
 		return find_car(car_db->right, nlis); // Search in right subtree
 	}
 }
