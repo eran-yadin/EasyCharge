@@ -936,11 +936,6 @@ int remOutOrderPort(Station* st_db)
 }
 
 
-
-
-
-
-
 //func 12: Remove Customer
 void remove_customer(DB_holder* db_holder)
 {
