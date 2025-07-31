@@ -83,6 +83,11 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 		char type[11];
 		char license[11];
 		raw_db_port*port = malloc(sizeof(raw_db_port));
+		if (!port)
+		{
+			printf("Memory allocation failed for raw_db_port. in: getRowData_Port_from_file \n");
+			return NULL;
+		}
 		//10 inputs
 		short check;
 		check = sscanf(buffer, "%d,%d,%10[^,],%d,%hd,%hd,%hd,%hd,%hd,%10[^,]", &port->station_id,&port->port_num,&type,&port->status,&port->tin.Year, &port->tin.Month, &port->tin.Day, &port->tin.Hour, &port->tin.Min,&license);
@@ -146,14 +151,16 @@ raw_que** get_raw_que_from_file(char const* filename)
 	int i = 0;
 	while ((fgets(buffer, sizeof(buffer), file)) != NULL)
 	{
-		head = (raw_que**)realloc(head, sizeof(raw_que**) * (i + 1));
+		raw_que** temp;
+		temp = (raw_que**)realloc(head, sizeof(raw_que*) * (i + 2));
 		//make real good realloc system
-		if (!head) {
+		if (!temp) {
 			//error code: 1033
 			fprintf(stderr, "Memory allocation failed for raw_que array\n");
 			fclose(file);
 			return NULL;
 		}
+		head = temp; // Update head to point to the new memory block
 		head[i + 1] = NULL; // Null-terminate the array
 		raw_que* que = malloc(sizeof(raw_que));
 		if (que == NULL) {
@@ -412,7 +419,8 @@ Port* is_port_type_exist(Station* st_db, portType port)
 {
 	if (!st_db)
 	{
-		return;
+		printf("Station database is NULL.\n");
+		return NULL;
 	}
 	Port* current = st_db->portList;
 	while (current != NULL) {
@@ -421,6 +429,7 @@ Port* is_port_type_exist(Station* st_db, portType port)
 		}
 		current = current->next; // Move to the next port in the list
 	}
+	return NULL; // Return NULL if no matching port is found
 }
 
 carNode* remove_car_from_queue(Station* st_db, const char* license) 
@@ -448,35 +457,37 @@ carNode* remove_car_from_queue(Station* st_db, const char* license)
 	return NULL; // Return NULL if the car was not found in the queue
 }
 
-int how_long_car_que(Station* st, const char* license) 
+int how_long_car_que(Station* st, Car* u_car) 
 {
 
-	if (st == NULL || license == NULL) {
+	if (st == NULL || u_car == NULL) {
 		return -1; // Return -1 if the station or queue is empty
 	}
 	
-	Car* car = find_station_by_car(st, license);
-	if (!car)
+	if (!u_car)
 	{
-		return;
+		printf("Car %s  doesn't exist or DataBase is currupt\n", u_car->nLicense);
+		return 0;
 	}
-	if (car->inqueue == 0)
+	if (u_car->inqueue == 0)
 	{
-		printf("Car with license %s is not in the queue.\n", license);
-		return;
+		printf("Car with license %s is not in the queue.\n", u_car->nLicense);
+		return 0;
 	}
-	Station* station = find_station_by_car(st, license);
+	Station* station = find_station_by_car(st, u_car->nLicense);
 	if (!station)
 	{
-		return;
+		printf("Station with car %s not found.\n", u_car->nLicense);
+		printf("pls check the database\n");
+		return 0;
 	}
 	int position = 0;
 	carNode* current = station->carQueue.front;
 	while (current != NULL) {
-		if (strcmp(current->car->nLicense, license) == 0) { // Check if the car license matches
+		if (strcmp(current->car->nLicense, u_car->nLicense) == 0) { // Check if the car license matches
 			return position+1; // Return the position of the car in the queue
 		}
-		if (current->car->type == car->type) {
+		if (current->car->type == u_car->type) {
 			position++; // Increment position only if the car type matches
 		}
 		current = current->next; // Move to the next car in the queue

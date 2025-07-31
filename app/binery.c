@@ -21,7 +21,7 @@ Station* read_s_one_f_f(FILE *pf)
 	Station* station = malloc(sizeof(Station));
 	if (station == NULL) {
 		fprintf(stderr, "Memory allocation failed\n");
-		return 1;
+		return NULL;
 	}
 	char name_b[200];
 	sscanf(buffer, "%u,%99[^,],%d,%lf,%lf", &station->id, name_b, &station->nPorts, &station->coord[0], &station->coord[1]);
@@ -571,25 +571,36 @@ void test_find_car() {
 	Car* car1 = (Car*)malloc(sizeof(Car));
 	Car* car2 = (Car*)malloc(sizeof(Car));
 	Car* car3 = (Car*)malloc(sizeof(Car));
+	if(car1 != NULL) {
+		strcpy(car1->nLicense, "123456789");
+	}
+	if (car2 != NULL) {
+		strcpy(car2->nLicense, "123456789");
 
-	strcpy(car1->nLicense, "123456789");
-	strcpy(car2->nLicense, "123867368");
-	strcpy(car3->nLicense, "389693758");
+	}
+	if (car3 != NULL) {
+		strcpy(car3->nLicense, "123456789");
+	}
 
 	// Create tree nodes
 	tCar* root = (tCar*)malloc(sizeof(tCar));
+	
 	tCar* left = (tCar*)malloc(sizeof(tCar));
 	tCar* right = (tCar*)malloc(sizeof(tCar));
-
+	if (!root||!left||!right)
+	{
+		printf("Memory allocation failed for tCar nodes. in test mode\n");
+		return; // Memory allocation failed
+	}
 	// Assign structure
 	root->car = car2;
-	root->left = left;
-	root->right = right;
 
+	root->left = left;
 	left->car = car1;
 	left->left = NULL;
 	left->right = NULL;
 
+	root->right = right;
 	right->car = car3;
 	right->left = NULL;
 	right->right = NULL;

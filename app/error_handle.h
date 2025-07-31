@@ -17,6 +17,6 @@ void print_last_error(Error* head);
 const char* my_strerror(int code);
 void test_error_list(Error** error_list);
 void print_errno();
-void log_error(int error);
+void log_error(int error,char* const error_str);
 
 #endif

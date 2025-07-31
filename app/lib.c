@@ -112,7 +112,8 @@ int menu_decision()
 	do
 	{
 		print_menu();
-		scanf("%d", &decision);
+		int scn = scanf("%d", &decision);
+		if (scn != 1) { log_error(5, "input in decision"); }
 		clean_stdin(); // Clear the input buffer
 		if (!is_valid(decision, 13, 0)) {
 			printf("Invalid choice. Please choose a number between 1 and 14.\n");
@@ -138,7 +139,6 @@ void fun_executer(int decision, DB_holder* db_holder)
 {
 	
 	
-	int st_car[5] = {0,0,0,0,0};
 	if (db_holder == NULL) {
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
@@ -387,6 +387,13 @@ void charge_car(DB_holder* db_holder)
 	else //occupied
 	{
 		carNode* car_node = malloc(sizeof(carNode));
+		if (car_node == NULL) {
+			//error code: memory allocation failed
+			fprintf(stderr, "Memory allocation failed for car node.\n");
+			free(tcar->car);
+			free(tcar);
+			return;
+		}
 		car_node->car = tcar->car; // Assign the car to the new car node
 		st->carQueue.rear->next = car_node; // Link the new car node at the end of the queue
 		st->carQueue.rear = car_node; // Update the rear pointer to the new car node
@@ -443,7 +450,7 @@ void checkCarStatus(DB_holder db)
 		//get station
 		Station* st = find_station_by_car(db.st_db, user_car->nLicense);
 		//add print func
-		int que = how_long_car_que(st, user_car->nLicense);
+		int que = how_long_car_que(st, user_car);
 		printf("car in place %d is in queue for charging in station %s\n", que,st->name);
 		return;
 	}
@@ -624,7 +631,7 @@ void print_station_statistics(Station* st)
 	printf("Station ID: %d\n", st->id);
 	printf("Station Name: %s\n", st->name);
 	printf("precent of occupied ports: %d%%\n", port_sta);
-	printf("port load: %f\n", car_count);
+	printf("port load: %f\n", port_load);
 
 	//calculate the percentage of non-working ports
 	count = 0; // Reset count for occupied ports

@@ -161,12 +161,12 @@ void print_errno()
 	}
 }
 
-void log_error(int error)
+void log_error(int error, char* const error_str)
 {
 	FILE* log_file = fopen("error_log.txt", "a");
 	if (log_file == NULL) {
 		fprintf(stderr, "Could not open error log file.\n");
 		return;
 	}
-	fprintf(log_file, "Error Code: %d, Message: %s\n", error, strerror(error));
+	fprintf(log_file, "Error Code: %d, Message: %s\n", error, error_str);
 }

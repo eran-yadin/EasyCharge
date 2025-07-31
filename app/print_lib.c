@@ -208,7 +208,7 @@ void print_car(Car* car_p, int car_choise[5],int port_choise[5])
 	printf("-------------------\n");
 	if (car_choise[0])
 	{
-		printf("car license: %d\n", car_p->nLicense);
+		printf("car license: %s\n", car_p->nLicense);
 	}
 	if (car_choise[1])
 	{
