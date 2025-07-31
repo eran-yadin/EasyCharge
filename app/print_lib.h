@@ -14,7 +14,7 @@ void print_ALL_ports(Station* st_db);
 void print_coord(coord c);
 char* port_type_to_string(portType port);
 void showOpening();
-void printDate(Date d);
+void print_Date(Date d);
 void print_port(Port* port_p, int port_choise[6], int car_choise[5]);
 void print_car(Car* car_p, int car_choise[5], int port_choise[5]);
 void print_station(Station* st, int st_choise[8], int port_choise[5], int car_choise[5]);

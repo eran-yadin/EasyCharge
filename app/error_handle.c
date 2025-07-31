@@ -7,6 +7,7 @@
 #include "lib.h"
 #include "inputer.h"
 #include "error_handle.h"
+#include "print_lib.h"
 
 #define max_error_list 15
 /// Error handling module for the application
@@ -16,13 +17,35 @@
 /// [2][3]: error code
 
 //----------Error codes----------
-//error code: 1000-1999 memory allocation errors
-#define MY_DB_ERROR 1001
+//error code: 1000-1999 memory allocation errors and DB errors
+#define E_1001 "Database failed to load"
+#define E_1002 "Memory allocation failed"
+#define E_1002	
+#define E_1002
+#define E_1002
+#define E_1002
+#define E_1002
+#define E_1002
+#define E_1002
+
 
 //error code: 2000-2999 input errors
 // 
 //----------Error codes----------
 
+void error_code(Error** error_list, unsigned int code)
+{
+	if (error_list == NULL) {
+		fprintf(stderr, "Error list is NULL\n");
+		return;
+	}
+	Error* new_error = create_error(code);
+	if (new_error == NULL) {
+		fprintf(stderr, "Failed to create new error\n");
+		return;
+	}
+	add_error_to_list(error_list, new_error);
+}
 
 void print_error(Error* error)
 {
@@ -31,7 +54,7 @@ void print_error(Error* error)
 		return;
 	}
 	printf("-------------------\n");
-	printDate(error->error_date);
+	print_Date(error->error_date);
 	printf("Error Code: %u\n", error->error_code);
 	printf("Error Message: %s\n", error->error_message);
 }
@@ -81,7 +104,7 @@ Error* add_error_to_list(Error** head, Error* new_error)
 		head[i] = head[i-1]; // Shift errors to the right
 	}
 	head[0] = new_error; // Add the new error at the beginning
-	return NULL;
+	return head[0];
 }
 
 void print_error_list(Error** head)
@@ -97,22 +120,53 @@ void print_error_list(Error** head)
 	}
 }
 
-void print_last_error(Error** head)
+void print_last_error(Error* head)
 {
 	if (!head)
 	{
 		return;
 	}
 	printf("----------last-error---------\n");
-	printDate(head[0]->error_date);
-	printf("Error Code: %u\n", head[0]->error_code);
-	printf("Error Message: %s\n", head[0]->error_message);
+	print_Date(head[0].error_date);
+	printf("Error Code: %u\n", head[0].error_code);
+	printf("Error Message: %s\n", head[0].error_message);
 }
 
 const char* my_strerror(int code)
 {
     switch (code) {
-    case MY_DB_ERROR: return "Database connection failed";
+    case 1001: return E_1001;
+	case 1002: return E_1002;
+	case 2001: return "Invalid input format";
     default: return "Unknown error";
     }
+}
+
+void test_error_list(Error** error_list)
+{
+	for (size_t i = 0; i < 45; i++)
+	{
+		error_code(error_list, i);
+	}
+	print_error_list(error_list);
+}
+
+void print_errno()
+{
+	int err_code = errno; // Get the current error code
+	if (err_code != 0) {
+		fprintf(stderr, "Error: %s\n", strerror(err_code)); // Print the error message
+	} else {
+		fprintf(stderr, "No error occurred.\n");
+	}
+}
+
+void log_error(int error)
+{
+	FILE* log_file = fopen("error_log.txt", "a");
+	if (log_file == NULL) {
+		fprintf(stderr, "Could not open error log file.\n");
+		return;
+	}
+	fprintf(log_file, "Error Code: %d, Message: %s\n", error, strerror(error));
 }

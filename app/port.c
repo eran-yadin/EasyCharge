@@ -66,7 +66,7 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 {
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
-		//error code:
+		//error code: 
 		fprintf(stderr, "Could not open file %s\n", filename);
 		return NULL;
 	}
@@ -75,7 +75,7 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 	fgets(buffer, sizeof(buffer), file); // Skip header line
 	if (feof(file))
 	{
-		//error code:
+		//error code: 
 		fclose(file);
 		return NULL; // No data in file
 	}
@@ -87,7 +87,7 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 		short check;
 		check = sscanf(buffer, "%d,%d,%10[^,],%d,%hd,%hd,%hd,%hd,%hd,%10[^,]", &port->station_id,&port->port_num,&type,&port->status,&port->tin.Year, &port->tin.Month, &port->tin.Day, &port->tin.Hour, &port->tin.Min,&license);
 		if (check != 10) {
-			//error code:
+			//error code: 1023
 			fprintf(stderr, "Error reading line: %s\n", buffer);
 			free(port);
 			continue; // Skip this line if it doesn't match the expected format
@@ -129,14 +129,14 @@ raw_que** get_raw_que_from_file(char const* filename)
 {
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
-		//error code:
+		//error code: 1031
 		fprintf(stderr, "Could not open file %s\n", filename);
 		return NULL;
 	}
 	char buffer[256];
 	fgets(buffer, sizeof(buffer), file); // Skip header line
 	if (feof(file)) {
-		//error code:
+		//error code: 1032
 		fclose(file);
 		return NULL; // No data in file
 	}
@@ -149,7 +149,7 @@ raw_que** get_raw_que_from_file(char const* filename)
 		head = (raw_que**)realloc(head, sizeof(raw_que**) * (i + 1));
 		//make real good realloc system
 		if (!head) {
-			//error code:
+			//error code: 1033
 			fprintf(stderr, "Memory allocation failed for raw_que array\n");
 			fclose(file);
 			return NULL;
@@ -157,7 +157,7 @@ raw_que** get_raw_que_from_file(char const* filename)
 		head[i + 1] = NULL; // Null-terminate the array
 		raw_que* que = malloc(sizeof(raw_que));
 		if (que == NULL) {
-			//error code:
+			//error code: 1034
 			fprintf(stderr, "Memory allocation failed for raw_que\n");
 			fclose(file);
 			return NULL;
@@ -185,7 +185,7 @@ void print_raw_que(raw_que** head) {
 //add ports to the station database-->loadFiles
 void add_ports_to_stations(Station* st_db, raw_db_port* port_data,tCar *car_db) {
 	if (st_db == NULL || port_data == NULL) {
-		//error code:
+		//error code: 101
 		return;
 	}
 	st_db->portList = linker_port(st_db->id, port_data,car_db); // Link ports to the station

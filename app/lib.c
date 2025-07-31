@@ -10,6 +10,7 @@
 #include "binery.h"
 #include "inputer.h"
 #include "print_lib.h"
+#include "error_handle.h"
 
 //----files names----
 #define stations_file "Stations.txt"
@@ -43,8 +44,9 @@
 
 //---------print settings-----------
 //print_ALL_DB
-#define st_choise_des {1, 1, 1, 1, 1, 1, 1, 0} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
+#define st_choise_des {1, 1, 1, 1, 1, 1, 1, 1} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
 #define st_port_des {1, 1, 1, 1, 1} //print_choise[num,port_type,status,charge_time,car]
+#define car_choise_des { 1, 1, 1, 1, 1 } //print_choise[nLicense,type,totalPayed,inqueu,port]
 //print_all_cars_in_stastion
 #define car_choise_des_1 {1, 1, 1, 1, 1} // nLicense,type,totalPayed,inqueu,port
 //
@@ -71,7 +73,7 @@ DB_holder * loadFiles()
 	check_port_count(st_db);
 	DB_holder *db_holder = malloc(sizeof(DB_holder));
 	if (db_holder == NULL) {
-		//error code:
+		//error code: 1002
 		fprintf(stderr, "Memory allocation failed for DB_holder\n");
 		return NULL;
 	}
@@ -138,7 +140,6 @@ void fun_executer(int decision, DB_holder* db_holder)
 	
 	int st_car[5] = {0,0,0,0,0};
 	if (db_holder == NULL) {
-		//error code:
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -159,7 +160,8 @@ void fun_executer(int decision, DB_holder* db_holder)
 	case FUNC_5_display_all_stations: {
 		int st_choise[] = st_choise_des;
 		int port_choise[] = st_port_des;
-		print_ALL_DB(db_holder->st_db, st_choise, port_choise, NULL);
+		int car_choise[] = car_choise_des;
+		print_ALL_DB(db_holder->st_db, st_choise, port_choise, car_choise);
 		break;
 	}
 	case FUNC_6_:
@@ -347,7 +349,7 @@ void charge_car(DB_holder* db_holder)
 			}
 			else if (choice == 1) {
 				//get new car details
-				tcar->car = get_user_new_car();
+				tcar= get_user_new_car();
 				//add the new car to the database
 				db_holder->car_db = rec_add_to_tree(db_holder->car_db, tcar);
 				tcar->car->pPort = NULL;
@@ -507,7 +509,7 @@ void stop_charging(DB_holder* DB)
 	}
 	// Calculate the total time charged
 	int unsigned time_charged = get_charge_min(correct_port->tin, getCurrentDate());
-	float charge_cost = 0.0;
+	double charge_cost = 0.0;
 	charge_cost = time_charged * CHARGE_COST;
 	u_car->totalPayed += charge_cost; // Update the total amount paid by the car
 	u_car->pPort = NULL; // Remove the car from the port
@@ -683,7 +685,7 @@ Car* find_top_customer(tCar* car_db,Car *top_five_cust[5])
 		return NULL;
 	}
 	Car* top_customer = car_db->car;
-	float max_amount = 0;
+	double max_amount = 0;
 	if (is_in_top_five(top_customer, top_five_cust)) {
 		top_customer = NULL;
 		max_amount = 0;
@@ -833,7 +835,7 @@ void release_car_from_port(Port* u_port,Station* st)
 	
 	// Calculate the total time charged
 	int unsigned time_charged = get_charge_min(correct_port->tin, getCurrentDate());
-	float charge_cost = 0.0;
+	double charge_cost = 0.0;
 	charge_cost = time_charged * CHARGE_COST;
 	u_car->totalPayed += charge_cost; // Update the total amount paid by the car
 	u_car->pPort = NULL; // Remove the car from the port
@@ -874,7 +876,7 @@ int remove_out_of_order_port(Station* st, int num)// auxiliary function to remov
 	Port* current = st->portList; // Start from the head of the port list
 	Port* previous = NULL;
 	Port* temp = NULL;
-
+	
 	while (current)
 	{
 		if (num == current->num)
@@ -903,6 +905,11 @@ int remove_out_of_order_port(Station* st, int num)// auxiliary function to remov
 				return 0;
 			}
 		}
+		else
+		{
+			previous = current; // Save the current node as previous
+			current = current->next; // Move to the next port
+		}
 	}
 }
 
@@ -920,10 +927,12 @@ int remOutOrderPort(Station* st_db)
 		printf("Station not found.\n");
 		return; // Station not found
 	}
-	
-	print_station(st_u, NULL, NULL, NULL); // Print the station details
-	printf("which port do you want to delete?\n");
+	int st_choise[] = st_choise_des; // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
+	int port_choise[] = st_port_des; // num,type,status,p2car,tin,next
+	print_station(st_u, st_choise, port_choise, NULL); // Print the station details
+	printf("which port do you want to delete?(0 to exit):\n");
 	int port_num = get_user_port_num();
+	if (port_num == 0) { printf("exiting....\n");getchar(); wait_for_user(); printf("\n\n\n"); return 0; } // If user chose to exit
 	int result = remove_out_of_order_port(st_u, port_num); // Remove the out of order port
 	if (result == 1) {
 		printf("Port %d has been removed successfully from station %s.\n", port_num, st_u->name);

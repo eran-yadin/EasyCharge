@@ -164,7 +164,7 @@ void showOpening() {
 	printf("                   |___/                            |___/       \n");
 }
 
-void printDate(Date d) 
+void print_Date(Date d) 
 {
 	printf("Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
 }
@@ -205,6 +205,7 @@ void print_car(Car* car_p, int car_choise[5],int port_choise[5])
 	{
 		return;
 	}
+	printf("-------------------\n");
 	if (car_choise[0])
 	{
 		printf("car license: %d\n", car_p->nLicense);
@@ -237,6 +238,10 @@ void print_car(Car* car_p, int car_choise[5],int port_choise[5])
 void print_station(Station* st,int st_choise[8], int port_choise[5], int car_choise[5])
 {
 	if (!st)
+	{
+		return;
+	}
+	if(!st_choise)
 	{
 		return;
 	}
