@@ -38,6 +38,9 @@
 #define FREE_PORT 2 // Port status for free
 #define OUT_OF_ORDER_PORT 3 // Port status for out of order
 
+#define OUT_OF_ORDER_PORT 3 // Port status for out of order ports
+
+
 //---------print settings-----------
 //print_ALL_DB
 #define st_choise_des {1, 1, 1, 1, 1, 1, 1, 0} // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
@@ -175,7 +178,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		Release_charging_ports(db_holder);
 		break;
 	case FUNC_11_:
-		
+		remOutOrderPort(db_holder->st_db);
 		break;
 	case FUNC_12_:
 		remove_customer(db_holder);
@@ -911,6 +914,7 @@ int remOutOrderPort(Station* st_db)
 		return; // No stations to remove ports from
 	}
 	//get user station
+	printf("Enter Station ID or Name: ");
 	Station* st_u = get_user_station(st_db);//get user station by ID
 	if (st_u == NULL) {
 		printf("Station not found.\n");
@@ -930,6 +934,11 @@ int remOutOrderPort(Station* st_db)
 	}
 
 }
+
+
+
+
+
 
 
 //func 12: Remove Customer
