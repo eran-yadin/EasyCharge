@@ -10,6 +10,7 @@
 #include "print_lib.h"
 #include "binery.h"
 #include "port.h"
+#include "error_handle.h"
 
 
 char *get_user_string()
@@ -18,7 +19,7 @@ char *get_user_string()
     fgets(buffer,254,stdin);
     char *input = malloc((strlen(buffer)+1)*sizeof(char));
 	if (input == NULL) {
-		//error code:
+		log_error(1001, "Memory allocation failed in get_user_string");
 		fprintf(stderr, "Memory allocation failed\n");
 		exit(EXIT_FAILURE);
 	}
@@ -48,35 +49,35 @@ Date getCurrentDate() {
 
 Date get_user_Data() {
     Date d;
-	//make sure to error handle the input (scanf)
+	int res;
     do
     {
         printf("Enter Year: ");
-        scanf("%hd", &d.Year);
+        res = scanf("%hd", &d.Year); if (res != 1) { log_error(5, "scanf fail in get_user_Data"); continue; }
 	} while (!is_valid(d.Year, 2100, 1900)); //make sure to change it in the next ara (FUTURE!!!!)
     
     do
     {
         printf("Enter Month (1 12): ");
-        scanf("%hd", &d.Month);
+        res = scanf("%hd", &d.Month); if (res != 1) { log_error(5, "scanf fail in get_user_Data"); continue; }
     } while (!is_valid(d.Month,12,1));
     
     do
     {
         printf("Enter Day (1 31): ");
-        scanf("%hd", &d.Day);
+		res = scanf("%hd", &d.Day); if (res != 1) { log_error(5, "scanf fail in get_user_Data"); continue; }
     } while (!is_valid(d.Day,31,1));
     
     do
     {
         printf("Enter Hour (0 23): ");
-        scanf("%hd", &d.Hour);
+		res = scanf("%hd", &d.Hour); if (res != 1) { log_error(5, "scanf fail in get_user_Data"); continue; }
     } while (!is_valid(d.Hour,23,0));
     
     do
     {
         printf("Enter Minute (0 59): ");
-        scanf("%hd", &d.Min);
+		res = scanf("%hd", &d.Min); if (res != 1) { log_error(5, "scanf fail in get_user_Data"); continue; }
     } while (!is_valid(d.Min,59,0));
     
     return d;
@@ -128,33 +129,48 @@ int is_str_0(char* const str)
 //TODO: test
 coord get_user_coord()
 {
+	int res;
 	coord c;
 	do
 	{
 		printf("Enter X coordinate: ");
-		scanf("%lf", &c.x);
-	} while (!is_valid(c.x, 180, -180)); // make sure the range is valid for longitude
+		c.x = get_user_long();
+	} while (!is_valid((int)c.x, 180, -180)); // make sure the range is valid for longitude
 
 	do
 	{
 		printf("Enter Y coordinate: ");
-		scanf("%lf", &c.y);
-	} while (!is_valid(c.y, 90, -90)); // make sure the range is valid for latitude
+		c.y = get_user_long();
+	} while (!is_valid((int)c.y, 90, -90)); // make sure the range is valid for latitude
 
 	return c;
+}
+
+long get_user_long()
+{
+	char buffer[256]; // 9 digits + null terminato
+	double num;
+	int* lis = NULL;
+	do
+	{
+		int res = scanf("%s", &buffer); if (res != 1) { log_error(5, "scanf fail in get_user_port_num"); continue; }
+		lis = turn_string_to_us_int(buffer);
+		if (lis) { num = *lis; }
+	} while (!lis);
+	return num;
 }
 
 // This function prompts the user to enter a car ID and returns it as a 9-digit string.
 char* get_user_nLisence()
 {
 	char buffer[256]; // 9 digits + null terminato
-	int ID;
+	int ID = 0;
     do
     {
         printf("Enter Car ID[8]: ");
-        scanf("%s", &buffer);
+        int res = scanf("%s", &buffer); if (res != 1) { log_error(5, "scanf fail in get_user_nLisence"); continue; }
 		int* lis = turn_string_to_us_int(buffer);
-		if (lis == NULL) { ID = -1; }
+		if (lis == NULL) { ID = -1; printf("pls enter valid lisence\n"); }
 		else { ID = *lis; } // Convert the string to an integer
     } while (!(ID<99999999 && ID>=0));
 	char* car_id = malloc(10 * sizeof(char)); // 9 digits + null terminator
@@ -193,7 +209,7 @@ unsigned get_user_st_ID()
 	do
 	{
 		printf("Enter Station ID: ");
-		scanf("%u", &st_id);
+		int res = scanf("%u", &st_id); if (res != 1) { log_error(5, "scanf fail in get_user_st_ID"); continue; }
 	} while (st_id <= 0); // Ensure the station ID is a positive integer
 	return st_id;
 }
@@ -203,22 +219,26 @@ tCar* get_user_new_car()
 	tCar* new_car = malloc(sizeof(tCar));
 	if (!new_car)
 	{
-		return;
+		log_error(1001, "Memory allocation failed for new car in get_user_new_car(new_car)");
+		return NULL;
 	}
 	new_car->car = malloc(sizeof(Car));
+	if (!new_car->car)
+	{
+		log_error(1001, "Memory allocation failed for new car in get_user_new_car(new_car->car)");
+		free(new_car);
+		return NULL; // Error handling for car allocation
+	}
 	new_car->car->pPort = NULL;
 	new_car->left = NULL;
 	new_car->right = NULL;
 
-	if (new_car == NULL) {
-		fprintf(stderr, "Memory allocation failed for new car.\n");
-		return NULL;
-	}
 
 	printf("Enter Car License Plate: ");
 	char* license_plate = get_user_nLisence();
 	if (license_plate == NULL) {
 		free(new_car);
+		log_error(5, "Error in get_user_nLisence in get_user_new_car");
 		return NULL; // Error handling for license plate input
 	}
 	strncpy(new_car->car->nLicense, license_plate, 9);
@@ -230,7 +250,7 @@ tCar* get_user_new_car()
 	do
 	{
 
-		scanf("%d", &type);
+		int res = scanf("%d", &type); if (res != 1) { log_error(5, "scanf fail in get_user_new_car"); continue; }
 	} while (!is_valid(type, 2, 0));
 	new_car->car->type = which_port_type_int(type);
 
@@ -248,7 +268,7 @@ int get_user_port_num()
 	do
 	{
 		printf("Enter port num: ");
-		scanf("%s", &buffer);
+		int res = scanf("%s", &buffer); if (res != 1) { log_error(5, "scanf fail in get_user_port_num"); continue; }
 		int* lis = turn_string_to_us_int(buffer);
 		if (lis == NULL) { num = -1; }
 		else { num = *lis; } // Convert the string to an integer
@@ -259,7 +279,7 @@ int get_user_port_num()
 unsigned* turn_string_to_us_int(const char* str) 
 {
 	int* p;
-	int i = strlen(str)-1;
+	int i = (int)strlen(str)-1;
 	int u = 0;
 	int sum = 0;
 	for (i; i > -1; i)
@@ -317,7 +337,7 @@ portType get_port_type_from_user()
 	do
 	{
 		printf("Enter Port Type (0 - FAST, 1 - MID, 2 - SLOW): ");
-		scanf("%d", &type);
+		int res = scanf("%d", &type); if (res != 1) { log_error(5, "scanf fail in get_port_type_from_user"); continue; }
 	} while (!is_valid(type, 2, 0));
 	return which_port_type_int(type);
 }

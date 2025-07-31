@@ -109,22 +109,25 @@ DB_holder* save_files(DB_holder* db_holder)
 int menu_decision()
 {
 	int decision;
+	printf("\n-----------------------------\n\n");
+	print_menu();
 	do
 	{
-		print_menu();
 		int scn = scanf("%d", &decision);
-		if (scn != 1) { log_error(5, "input in decision"); }
+		if (scn != 1) { log_error(5, "input in decision error in scanf"); }//error log
 		clean_stdin(); // Clear the input buffer
 		if (!is_valid(decision, 13, 0)) {
-			printf("Invalid choice. Please choose a number between 1 and 14.\n");
+			printf("Invalid choice. Please choose a number between 0 and 13.\n");
 		}
 	} while (!is_valid(decision, 13, 0));
+	printf("-----------------------------\n\n");
 	return decision;
 }
 
 void free_DB_holder(DB_holder* db_holder)
 {
 	if (db_holder == NULL) {
+		log_error(400, "DB_holder is NULL in free_DB_holder");
 		return; // Nothing to free
 	}
 	if (db_holder->st_db != NULL) {
@@ -140,7 +143,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 	
 	
 	if (db_holder == NULL) {
-		fprintf(stderr, "Database holder is NULL.\n");
+		log_error(400, "DB_holder is NULL in fun_executer");
 		return;
 	}
 	switch (decision)
@@ -193,6 +196,7 @@ void fun_executer(int decision, DB_holder* db_holder)
 		//add new line test
 		//save_files(db_holder); // Save the database before exiting
 		free_DB_holder(db_holder); // Free the database holder
+		log_error(0, "Exiting the program in fun_executer");
 		exit(0);
 	}
 }
@@ -203,7 +207,7 @@ Station* locNearSt(Station* st_db)
 	printf("\nenter coordinates: \n");
 	coord user_coord = get_user_coord();
 	if (st_db == NULL) {
-		//error code:
+		log_error(400, "Station database is NULL in locNearSt");
 		return NULL;
 	}
 	Station* nearest_station = locNearSt_rec(st_db, user_coord);
@@ -213,6 +217,7 @@ Station* locNearSt(Station* st_db)
 	}
 	print_nearest_Station(nearest_station, user_coord);
 	printf("----------------------------\n");
+	getchar(); // Wait for user input before returning
 	wait_for_user();
 	return nearest_station;
 }
@@ -220,6 +225,7 @@ Station* locNearSt(Station* st_db)
 Station* locNearSt_rec(Station* st_db, coord user_coord)
 {
 	if (st_db == NULL) {
+		//base case
 		return NULL;
 	}
 	double nearest_dist = distance(user_coord, convert_coord(st_db->coord[0],st_db->coord[1]));
@@ -263,7 +269,7 @@ coord convert_coord(double x, double y)
 void print_nearest_Station(Station* st,coord user_coord)
 {
 	if (st == NULL) {
-		//error code:
+		log_error(400, "Station is NULL in print_nearest_Station");
 		printf("No stations available.\n");
 		return;
 	}
@@ -285,7 +291,7 @@ void charge_car(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in charge_car");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -297,14 +303,19 @@ void charge_car(DB_holder* db_holder)
 	{
 		char* st_id_str = get_user_string();
 		unsigned int* st_id_unsigned = turn_string_to_us_int(st_id_str);
+		int st_id_int = 0;
+		if(st_id_unsigned) {
+			st_id_int = *st_id_unsigned;
+		}
 		if (st_id_unsigned && is_str_0(st_id_str))
 		{			// User chose to exit
 			printf("Exiting...\n");
+
 			wait_for_user();
 			return;
 		}
 		if (st_id_unsigned) {
-			st = find_station_by_id(db_holder->st_db, *st_id_unsigned);
+			st = find_station_by_id(db_holder->st_db, st_id_int);
 		}
 		else
 		{
@@ -314,7 +325,9 @@ void charge_car(DB_holder* db_holder)
 		{	//st does not exist
 			printf("station does not exist, try again OR enter 0 to exit: ");
 		}
+
 	} while (!st);
+	
 	//get user license plate
 	char* license_plate;
 	tCar* tcar = init_tCar();
@@ -322,7 +335,7 @@ void charge_car(DB_holder* db_holder)
 	{
 		license_plate = get_user_nLisence();
 		if (license_plate == NULL) {
-			//error code: 
+			log_error(5, "Error in get_user_nLisence| in charge_car");
 			return;
 		}
 		tcar->car = find_car(db_holder->car_db, license_plate);
@@ -332,7 +345,12 @@ void charge_car(DB_holder* db_holder)
 			int choice;
 			do
 			{
-				scanf("%d", &choice);
+				int res = scanf("%d", &choice);
+				if(res != 1) {
+					log_error(5, "Error in scanf for choice in charge_car");
+					clean_stdin(); // Clear the input buffer
+					continue; // Retry input
+				}
 				clean_stdin(); // Clear the input buffer
 				if (!is_valid(choice, 2, 0)) {
 					printf("Invalid choice. Please choose 1, 2, or 0.\n");
@@ -388,7 +406,7 @@ void charge_car(DB_holder* db_holder)
 	{
 		carNode* car_node = malloc(sizeof(carNode));
 		if (car_node == NULL) {
-			//error code: memory allocation failed
+			log_error(1001, "Memory allocation failed for car node in charge_car");
 			fprintf(stderr, "Memory allocation failed for car node.\n");
 			free(tcar->car);
 			free(tcar);
@@ -423,6 +441,11 @@ void checkCarStatus(DB_holder db)
 			return;
 		}
 		user_car = find_car(db.car_db, user_lis);
+		if(user_car == NULL){
+			printf("Car with license plate %s does not exist. Please try again.\n\n", user_lis);
+			free(user_lis); // Free the memory allocated for user_lis
+			continue; // Retry input
+		}
 	} while (!user_car);
 
 	if (user_car == NULL)//dont find car
@@ -557,7 +580,7 @@ void display_all_cars_in_station(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in display_all_cars_in_station");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -566,7 +589,7 @@ void display_all_cars_in_station(DB_holder* db_holder)
 	Station* st = get_user_station(db_holder->st_db);
 	if (!st)
 	{
-		//st wasnt found
+		//not error
 		return;
 	}
 	int st_choise[] = st_choise_des;
@@ -586,7 +609,7 @@ void report_station_statistics(DB_holder* db_holder)
 		return;
 	}
 	//get user station ID 
-	printf("Enter Station ID: ");
+	printf("Enter Station ID or Name: ");
 	Station* st = get_user_station(db_holder->st_db);
 	if (!st)
 	{
@@ -601,7 +624,7 @@ void report_station_statistics(DB_holder* db_holder)
 void print_station_statistics(Station* st)
 {
 	if (st == NULL) {
-		printf("No station found.\n");
+		printf("No station found.\n");//not error
 		return;
 	}
 	//setup  numbers for printing
@@ -653,7 +676,7 @@ void find_top_customer_five(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in find_top_customer_five");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -739,7 +762,7 @@ void add_new_port(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in add_new_port");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -756,7 +779,7 @@ void add_new_port(DB_holder* db_holder)
 	//create a new port
 	Port* new_port = malloc(sizeof(Port));
 	if (new_port == NULL) {
-		//error code: memory allocation failed
+		log_error(1001, "Memory allocation failed for new port in add_new_port");
 		fprintf(stderr, "Memory allocation failed for new port.\n");
 		return;
 	}
@@ -770,10 +793,12 @@ void add_new_port(DB_holder* db_holder)
 	if (last_port == NULL) {
 		st->portList = new_port; // If the port list is empty, set the new port as the head
 		new_port->num = 1;
+		new_port->next = NULL; // Initialize the next pointer to NULL
 	}
 	else {
 		last_port->next = new_port; // Otherwise, add the new port to the end of the list
 		new_port->num = last_port->num + 1; // Assign the new port number
+		new_port->next = NULL; // Initialize the next pointer to NULL
 	}
 	carNode* car_node = st->carQueue.front; // Get the head of the car queue
 	while (car_node != NULL && car_node->car->type != type)
@@ -788,10 +813,13 @@ void add_new_port(DB_holder* db_holder)
 		new_port->status = OCCUPID_PORT; // Mark the port as occupied
 		printf("Car with license plate %s has been charged at port %d in station %s.\n",
 			car_node->car->nLicense, new_port->num, st->name);
+		st->nCars++; // Increment the number of cars in the station
+		new_port->tin = getCurrentDate(); // Set the time in for the port
 	}
 	else {
 		new_port->p2car = NULL; // If no car found, set the port's car pointer to NULL
 		new_port->status = FREE_PORT; // Mark the port as free
+		new_port->tin.Year = 0; new_port->tin.Month = 0; new_port->tin.Day = 0; new_port->tin.Hour = 0; new_port->tin.Min = 0; // Set the time in to 0
 	}
 	
 }
@@ -801,7 +829,7 @@ void Release_charging_ports(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in Release_charging_ports");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
@@ -858,6 +886,7 @@ void release_car_from_port(Port* u_port,Station* st)
 		correct_port->status = 2; // Mark the port as free
 	}
 	//debug tool
+	printf("\n---------------------\n");
 	printf("Car with license plate %s has stopped charging.\n", u_car->nLicense);
 	printf("Total time charged: %d minutes.\n", time_charged);
 	printf("Total amount paid: %.2f.\n", u_car->totalPayed);
@@ -870,7 +899,7 @@ void release_car_from_port(Port* u_port,Station* st)
 	{
 		printf("is now free.\n");
 	}
-
+	printf("---------------------\n");
 	// Update the station's number of cars
 	return; // Successfully stopped charging
 }
@@ -918,21 +947,23 @@ int remove_out_of_order_port(Station* st, int num)// auxiliary function to remov
 			current = current->next; // Move to the next port
 		}
 	}
+	return 0;
 }
 
 int remOutOrderPort(Station* st_db)
 {
 	if (st_db == NULL)
 	{
-		printf("No stations available.\n");
-		return; // No stations to remove ports from
+		log_error(400, "Station database is NULL in remOutOrderPort");
+		printf("No stations available. error in data base\n");
+		return 0; // No stations to remove ports from
 	}
 	//get user station
 	printf("Enter Station ID or Name: ");
 	Station* st_u = get_user_station(st_db);//get user station by ID
 	if (st_u == NULL) {
 		printf("Station not found.\n");
-		return; // Station not found
+		return 0; // Station not found
 	}
 	int st_choise[] = st_choise_des; // id,name,nPorts,coord,nCars,port_list,car_que_num,carQueue
 	int port_choise[] = st_port_des; // num,type,status,p2car,tin,next
@@ -948,7 +979,7 @@ int remOutOrderPort(Station* st_db)
 	{
 		printf("Port %d is not out of order or does not exist in station %s.\n", port_num, st_u->name);
 	}
-
+	return 0;
 }
 
 
@@ -957,12 +988,12 @@ void remove_customer(DB_holder* db_holder)
 {
 	// Check if db_holder is NULL
 	if (db_holder == NULL) {
-		//error code:
+		log_error(400, "DB_holder is NULL in remove_customer");
 		fprintf(stderr, "Database holder is NULL.\n");
 		return;
 	}
 	Car* car_to_remove;
-	char* license_plate_f;
+	char* license_plate_f = NULL;
 	//get user license plate
 	do
 	{

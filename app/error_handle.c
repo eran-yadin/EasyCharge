@@ -168,5 +168,7 @@ void log_error(int error, char* const error_str)
 		fprintf(stderr, "Could not open error log file.\n");
 		return;
 	}
-	fprintf(log_file, "Error Code: %d, Message: %s\n", error, error_str);
+	fprintf(log_file, "Error Code: %d, Message: %s ,time: ", error, error_str);
+	Date d = getCurrentDate(); // Assuming getCurrentDate() is defined in inputer.c
+	fprintf(log_file,"Date: %04d-%02d-%02d %02d:%02d\n", d.Year, d.Month, d.Day, d.Hour, d.Min);
 }

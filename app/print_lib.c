@@ -5,6 +5,7 @@
 #include "print_lib.h"
 #include "inputer.h"
 #include "port.h"
+#include "error_handle.h"
 
 void print_menu()
 {
@@ -52,7 +53,7 @@ void print_que_in_station(Station* st_db)
 void print_db_car(car_db* head)
 {
 	if (head == NULL) {
-		//error code:
+		log_error(400, "Car database is NULL in print_db_car");
 		printf("No cars in the database.\n");
 		return;
 	}
@@ -89,7 +90,7 @@ Station* print_station_by_id(Station* head)
 void print_port_in_st(Station* st)
 {
 	if (st == NULL){
-		//error code:
+		log_error(400, "Station is NULL in print_port_in_st");
 		return;
 	}
 	Port* current = st->portList;
@@ -122,7 +123,7 @@ void print_port_in_st_only_working(Station* st)
 void print_ALL_ports(Station* st_db) 
 {
 	if (st_db == NULL) {
-		//error code:
+		log_error(400, "Station database is NULL in print_ALL_ports");
 		return;
 	}
 	printf("station ID: %d\n", st_db->id);

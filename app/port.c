@@ -9,6 +9,7 @@
 #include "binery.h"
 #include "inputer.h"
 #include "print_lib.h"
+#include "error_handle.h"
 
 //create a empty port
 Port* createPort(int num, portType type) {
@@ -99,6 +100,7 @@ raw_db_port *getRowData_Port_from_file(char const* filename)
 		}
 		port->type = which_port_type_st(type);
 		port->next = NULL;
+		trim_newline(license); // Remove newline character if present
 		strcpy(port->nLicense, license);
 		raw_db_port* current = head;
 		if (current == NULL) {
@@ -146,7 +148,7 @@ raw_que** get_raw_que_from_file(char const* filename)
 		return NULL; // No data in file
 	}
 	raw_que** head = (raw_que**)malloc(sizeof(raw_que**));
-	char nLicense[10];
+	char nLicense[11];
 	nLicense[sizeof(nLicense) - 1] = '\0';  // Force null-termination
 	int i = 0;
 	while ((fgets(buffer, sizeof(buffer), file)) != NULL)
@@ -155,7 +157,7 @@ raw_que** get_raw_que_from_file(char const* filename)
 		temp = (raw_que**)realloc(head, sizeof(raw_que*) * (i + 2));
 		//make real good realloc system
 		if (!temp) {
-			//error code: 1033
+			log_error(1001, "Memory allocation failed for raw_que array in get_raw_que_from_file");
 			fprintf(stderr, "Memory allocation failed for raw_que array\n");
 			fclose(file);
 			return NULL;
@@ -164,13 +166,16 @@ raw_que** get_raw_que_from_file(char const* filename)
 		head[i + 1] = NULL; // Null-terminate the array
 		raw_que* que = malloc(sizeof(raw_que));
 		if (que == NULL) {
-			//error code: 1034
+			log_error(1001, "Memory allocation failed for raw_que in get_raw_que_from_file");
 			fprintf(stderr, "Memory allocation failed for raw_que\n");
 			fclose(file);
 			return NULL;
 		}
 
-		sscanf(buffer, "%10[^,],%d", &nLicense,&que->id);
+		int res = sscanf(buffer, "%10[^,],%d", &nLicense,&que->id);
+		if(res != 2) {
+			log_error(5, "Error reading buffer in: get_raw_que_from_file");
+		}
 		strcpy(que->nLicense, nLicense);
 		head[i] = que;
 		i++;
@@ -192,7 +197,7 @@ void print_raw_que(raw_que** head) {
 //add ports to the station database-->loadFiles
 void add_ports_to_stations(Station* st_db, raw_db_port* port_data,tCar *car_db) {
 	if (st_db == NULL || port_data == NULL) {
-		//error code: 101
+		//no error base case
 		return;
 	}
 	st_db->portList = linker_port(st_db->id, port_data,car_db); // Link ports to the station
@@ -204,7 +209,7 @@ void add_ports_to_stations(Station* st_db, raw_db_port* port_data,tCar *car_db) 
 Port* linker_port(int id, raw_db_port* port_data,tCar *car_db) 
 {
 	if (port_data == NULL) {
-		//error code:
+		log_error(400, "Port data is NULL in linker_port");
 		fprintf(stderr, "Port data is NULL.\n");
 		return NULL;
 	}
@@ -246,6 +251,7 @@ Port* linker_port(int id, raw_db_port* port_data,tCar *car_db)
 				temp = temp->next; // Traverse to the end of the list
 			}
 			temp->next = newPort; // Link the new port at the end
+			newPort->next = NULL; // Ensure the new port's next pointer is NULL
 		}
 		found_port = found_port->next; // Move to the next port in the linked list
 		if (found_port == NULL)
@@ -329,7 +335,7 @@ void add_que_to_st(Station* st_db, tCar* car_db, raw_que** head) {
 int port_occupid(Station* st)
 {
 	if (st == NULL) {
-		//error code:
+		log_error(400, "Station is NULL in port_occupid");
 		return 0; // No ports occupied if station is NULL
 	}
 	int count = 0;
@@ -347,7 +353,7 @@ void write_que_to_file(Station* st_db, const char* file_name)
 {
 	FILE* pf = fopen(file_name, "w");
 	if (pf == NULL) {
-		//error code:
+		log_error(5000, "Could not open file for writing in write_que_to_file");
 		fprintf(stderr, "Could not open file %s for writing\n", file_name);
 		return;
 	}
@@ -369,6 +375,7 @@ void write_que_to_file_rec(Station* st_db, FILE* pf)
 void write_que_list_to_file(carNode* head,int id, FILE* pf)
 {
 	if (head == NULL || pf == NULL) {
+		//base case
 		return;
 	}
 	while (head)
@@ -382,7 +389,7 @@ void write_port_to_file(Station* st_db, const char* file_name)
 {
 	FILE* pf = fopen(file_name, "w");
 	if (pf == NULL) {
-		//error code:
+		log_error(5000, "Could not open file for writing in write_port_to_file");
 		fprintf(stderr, "Could not open file %s for writing\n", file_name);
 		return;
 	}
@@ -404,6 +411,7 @@ void write_port_to_file_rec(Station* st_db, FILE* pf)
 void write_port_list_to_file(Port* head, int id, FILE* pf)
 {
 	if (head == NULL || pf == NULL) {
+		log_error(400, "Port head or file pointer is NULL in write_port_list_to_file");
 		return;
 	}
 	while (head)
@@ -419,6 +427,7 @@ Port* is_port_type_exist(Station* st_db, portType port)
 {
 	if (!st_db)
 	{
+		log_error(400, "Station database is NULL in is_port_type_exist");
 		printf("Station database is NULL.\n");
 		return NULL;
 	}
@@ -435,6 +444,7 @@ Port* is_port_type_exist(Station* st_db, portType port)
 carNode* remove_car_from_queue(Station* st_db, const char* license) 
 {
 	if (st_db == NULL || st_db->carQueue.front == NULL) {
+		log_error(400, "Station database or car queue is NULL in remove_car_from_queue");
 		return NULL; // Return NULL if the station or queue is empty
 	}
 	carNode* current = st_db->carQueue.front;
@@ -461,6 +471,7 @@ int how_long_car_que(Station* st, Car* u_car)
 {
 
 	if (st == NULL || u_car == NULL) {
+		log_error(400, "Station or car is NULL in how_long_car_que");
 		return -1; // Return -1 if the station or queue is empty
 	}
 	

@@ -23,6 +23,8 @@ int is_valid(int val, int max, int min);
 int is_str_0(char* const str);
 //get user coordinates in struct coord(fl x,fl y)
 coord get_user_coord();
+
+long get_user_long();
 //get user input for car id
 char* get_user_nLisence();
 
