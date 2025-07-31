@@ -20,6 +20,7 @@ Station* get_user_station(Station* st_db);
 
 int is_valid(int val, int max, int min);
 
+int is_str_0(char* const str);
 //get user coordinates in struct coord(fl x,fl y)
 coord get_user_coord();
 //get user input for car id
@@ -40,8 +41,6 @@ int get_user_port_num();
 unsigned* turn_string_to_us_int(const char* str);
 
 unsigned int get_charge_min(Date a, Date b);
-
-void delete_last_two_lines(const char* filename);
 
 portType get_port_type_from_user();
 #endif
