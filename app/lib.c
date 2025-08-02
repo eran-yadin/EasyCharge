@@ -847,7 +847,7 @@ void Release_charging_ports(DB_holder* db_holder)
 		if (u_port->status == 3) { continue; }
 		if (u_port->p2car) {
 			int unsigned time_charged = get_charge_min(u_port->tin, getCurrentDate());
-			if(time_charged >= 30) // Check if the car has been charging for at least 30 minutes
+			if(time_charged >= 600) // Check if the car has been charging for at least 30 minutes
 			{
 				release_car_from_port(u_port, st); // Release the car from the port
 			}
