@@ -155,8 +155,9 @@ long get_user_long()
 	{
 		int res = scanf("%s", &buffer); if (res != 1) { log_error(5, "scanf fail in get_user_port_num"); continue; }
 		lis = turn_string_to_us_int(buffer);
-		if (lis) { num = *lis; }
+		if (lis) { num = atof(buffer); }
 	} while (!lis);
+	printf("%lf", num); //debug tool
 	return num;
 }
 
@@ -284,9 +285,15 @@ unsigned* turn_string_to_us_int(const char* str)
 	int sum = 0;
 	for (i; i > -1; i)
 	{
-		if (*str < '0' || *str > '9')
+		if (str[i] < '0' || str[i] > '9')
 		{
-			return NULL; // Return NULL if invalid character found
+			if(str[i] != '.')return NULL; // Return NULL if invalid character found
+			else{
+				i--; // Skip the decimal point
+				u = 0; // Reset the unit position
+				sum = 0;
+				continue; // Continue to the next character
+			}
 		}
 		int temp = (str[i] - '0');
 		sum = sum+ (int)(pow(10,u)*(str[i] - '0'));

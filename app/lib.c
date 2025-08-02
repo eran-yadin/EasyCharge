@@ -39,8 +39,6 @@
 #define FREE_PORT 2 // Port status for free
 #define OUT_OF_ORDER_PORT 3 // Port status for out of order
 
-#define OUT_OF_ORDER_PORT 3 // Port status for out of order ports
-
 
 //---------print settings-----------
 //print_ALL_DB
@@ -844,7 +842,7 @@ void Release_charging_ports(DB_holder* db_holder)
 	Port* u_port = st->portList; // Get the head of the port list
 	while (u_port != NULL)
 	{
-		if (u_port->status == 3) { continue; }
+		if (u_port->status == 3) { u_port = u_port->next; continue; }
 		if (u_port->p2car) {
 			int unsigned time_charged = get_charge_min(u_port->tin, getCurrentDate());
 			if(time_charged >= 600) // Check if the car has been charging for at least 30 minutes
@@ -852,6 +850,9 @@ void Release_charging_ports(DB_holder* db_holder)
 				release_car_from_port(u_port, st); // Release the car from the port
 			}
 		}
+		else {
+			u_port->tin.Year = 0; u_port->tin.Month = 0; u_port->tin.Day = 0; u_port->tin.Hour = 0; u_port->tin.Min = 0;
+		} // Set the time in to 0}
 		u_port = u_port->next; // Move to the next port in the list
 	}
 }
@@ -874,17 +875,21 @@ void release_car_from_port(Port* u_port,Station* st)
 	charge_cost = time_charged * CHARGE_COST;
 	u_car->totalPayed += charge_cost; // Update the total amount paid by the car
 	u_car->pPort = NULL; // Remove the car from the port
+	correct_port->tin.Year = 0; correct_port->tin.Month = 0; correct_port->tin.Day = 0; correct_port->tin.Hour = 0; correct_port->tin.Min = 0; // Set the time in to 0
 	if (car_node != NULL)
 	{
 		correct_port->p2car = car_node->car;
 		remove_car_from_queue(st, car_node->car->nLicense); // Remove the car from the queue
 		car_node->car->pPort = correct_port; // Assign the port to the car
+		correct_port->tin = getCurrentDate(); // Set the time in for the port
 	}
 	else
 	{
 		correct_port->p2car = NULL; // Set the port's car pointer to NULL
 		correct_port->status = 2; // Mark the port as free
+		
 	}
+	
 	//debug tool
 	printf("\n---------------------\n");
 	printf("Car with license plate %s has stopped charging.\n", u_car->nLicense);
