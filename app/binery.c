@@ -19,6 +19,7 @@ Station* read_s_one_f_f(FILE *pf)
 {
 	char buffer[256];
 	fgets(buffer, sizeof(buffer), pf); 
+	if (feof(pf)) { return 0x222222201; } // Check for end of file
 	Station* station = malloc(sizeof(Station));
 	if (station == NULL) {
 		log_error(1001,"Memory allocation failed in *station in read_s_one_f_f");
@@ -61,16 +62,20 @@ Station* read_st_from_file(char const *file_name)
 	char buffer[256];
 	fgets(buffer, sizeof(buffer), pf); // Skip header line
 	if (feof(pf)) { return 0; }
-	do{
+	while ((!feof(pf)))
+	{
 		Station* station = read_s_one_f_f(pf);
 		if (station == NULL) {
+			if(station == (Station*)0x222222201) {
+				break; // End of file reached
+			}
 			log_error(1001, "Failed to read station data from file in read_st_from_file");
 			continue; // skip bad lines
 		}
 		if (feof(pf)) { break; }
 		head = add_to_stationDB(head, station);
 
-	} while (!feof(pf));
+	}
 	return head;
 }
 
