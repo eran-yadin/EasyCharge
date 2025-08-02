@@ -15,6 +15,7 @@
 int main() {
 	showOpening();
 	printf("welcome:\n");
+	log_error(0, "Program started successfully in main");
 	int decision = 0;
 	do
 	{
