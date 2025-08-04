@@ -156,8 +156,9 @@ long get_user_long()
 		int res = scanf("%s", &buffer); if (res != 1) { log_error(5, "scanf fail in get_user_port_num"); continue; }
 		lis = turn_string_to_us_int(buffer);
 		if (lis) { num = atof(buffer); }
+		else { printf("pls enter valid number\n"); num = -1; } // Convert the string to a double
 	} while (!lis);
-	printf("%lf", num); //debug tool
+	//printf("%lf", num); //debug tool
 	return num;
 }
 
@@ -287,7 +288,7 @@ unsigned* turn_string_to_us_int(const char* str)
 	{
 		if (str[i] < '0' || str[i] > '9')
 		{
-			if(str[i] != '.')return NULL; // Return NULL if invalid character found
+			if(str[i] != '.'&&str[i] != '-')return NULL; // Return NULL if invalid character found
 			else{
 				i--; // Skip the decimal point
 				u = 0; // Reset the unit position
