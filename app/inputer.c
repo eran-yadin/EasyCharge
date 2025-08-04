@@ -135,12 +135,19 @@ coord get_user_coord()
 	{
 		printf("Enter X coordinate: ");
 		c.x = get_user_long();
+		if(!is_valid((int)c.x, 180, -180)){printf("Invalid longitude. Please enter a value between -180 and 180.\n");
+			continue; // Retry input if the longitude is invalid
+		}
 	} while (!is_valid((int)c.x, 180, -180)); // make sure the range is valid for longitude
 
 	do
 	{
 		printf("Enter Y coordinate: ");
 		c.y = get_user_long();
+		if (!is_valid((int)c.x, 90, -90)) {
+			printf("Invalid longitude. Please enter a value between -180 and 180.\n");
+			continue; // Retry input if the longitude is invalid
+		}
 	} while (!is_valid((int)c.y, 90, -90)); // make sure the range is valid for latitude
 
 	return c;
